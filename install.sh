@@ -12,6 +12,7 @@ DOTFILES="$(cd "$(dirname "$0")" && pwd)"
 
 # Files to symlink to $HOME
 HOME_FILES=(
+  .zprofile
   .zshrc
   .gitconfig
 )
