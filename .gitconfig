@@ -1,0 +1,41 @@
+[user]
+	name = jrozelle
+	email = julien@rozelle.fr
+
+[core]
+	editor = vim
+	autocrlf = input
+	pager = less -FRX
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+	default = current
+
+[fetch]
+	prune = true
+
+[rebase]
+	autoStash = true
+
+[merge]
+	conflictstyle = diff3
+
+[diff]
+	colorMoved = default
+
+[alias]
+	st = status
+	co = checkout
+	br = branch
+	ci = commit
+	ca = commit --amend
+	unstage = reset HEAD --
+	last = log -1 HEAD
+	lg = log --oneline --decorate --graph --all -n 25
+	undo = reset --soft HEAD~1
