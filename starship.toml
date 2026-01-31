@@ -1,0 +1,66 @@
+# Starship prompt config
+# Docs: https://starship.rs/config/
+
+# Timeout for commands (ms)
+command_timeout = 1000
+
+# Newline before prompt
+add_newline = true
+
+# Prompt format
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_status\
+$docker_context\
+$cmd_duration\
+$line_break\
+$character"""
+
+[username]
+show_always = false
+style_user = "bold yellow"
+format = "[$user]($style)"
+
+[hostname]
+ssh_only = true
+style = "bold yellow"
+format = "[@$hostname]($style) "
+
+[directory]
+truncation_length = 4
+truncate_to_repo = true
+style = "bold cyan"
+
+[git_branch]
+symbol = " "
+style = "bold purple"
+
+[git_status]
+style = "bold red"
+conflicted = "="
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked = "?"
+stashed = "$"
+modified = "!"
+staged = "+"
+renamed = "»"
+deleted = "✘"
+
+[docker_context]
+symbol = " "
+style = "bold blue"
+only_with_files = true
+
+[cmd_duration]
+min_time = 2000
+style = "bold yellow"
+format = "[$duration]($style) "
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
