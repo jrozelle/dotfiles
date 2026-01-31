@@ -16,6 +16,7 @@ $git_branch\
 $git_status\
 $docker_context\
 $cmd_duration\
+$time\
 $line_break\
 $character"""
 
@@ -60,6 +61,12 @@ only_with_files = true
 min_time = 2000
 style = "bold yellow"
 format = "[$duration]($style) "
+
+[time]
+disabled = false
+time_format = "%H:%M:%S"
+style = "bold yellow"
+format = " [$time]($style)"
 
 [character]
 success_symbol = "[❯](bold green)"
