@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Install Homebrew first (macOS only) - needed for git
+if [[ "$OSTYPE" == darwin* ]] && ! command -v brew >/dev/null; then
+  echo "==> Installing Homebrew"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+fi
+
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
 
 # Files to symlink to $HOME
@@ -41,13 +48,6 @@ mkdir -p "$HOME/.config"
 for file in "${CONFIG_FILES[@]}"; do
   [[ -f "$DOTFILES/$file" ]] && link_file "$DOTFILES/$file" "$HOME/.config/$file"
 done
-
-# Install Homebrew (macOS only)
-if [[ "$OSTYPE" == darwin* ]] && ! command -v brew >/dev/null; then
-  echo "==> Installing Homebrew"
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  eval "$(/opt/homebrew/bin/brew shellenv)"
-fi
 
 # Bootstrap zsh plugins (antidote)
 echo "==> Bootstrapping zsh plugins"
