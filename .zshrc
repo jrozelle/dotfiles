@@ -15,6 +15,12 @@ elif [[ -x /usr/local/bin/brew ]]; then
 fi
 
 # --------------------
+# Environment
+# --------------------
+export EDITOR=vim
+export VISUAL=vim
+
+# --------------------
 # Zsh core
 # --------------------
 setopt autocd
@@ -131,7 +137,9 @@ elif _has ggrep; then
 else
   alias g='grep -n'
 fi
-alias rg='rg --smart-case'
+if _has rg; then
+  alias rg='rg --smart-case'
+fi
 
 # ====================
 # Aliases: git (essentiels)
@@ -170,7 +178,9 @@ myip() {
   echo
 }
 alias pingg='ping -c 5 1.1.1.1'
-alias brewup='brew upgrade -g && brew cleanup --prune=0'
+if [[ "$_os" == mac ]]; then
+  alias brewup='brew upgrade -g && brew cleanup --prune=0'
+fi
 
 # ====================
 # Aliases: docker
