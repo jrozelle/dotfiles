@@ -244,7 +244,7 @@ if _has docker; then
 
   # Pull toutes les images et rebuild
   dup() {
-    if [[ -f docker-compose.yml || -f compose.yml ]]; then
+    if [[ -f docker-compose.yaml || -f docker-compose.yml || -f compose.yml ]]; then
       docker compose pull && docker compose up -d
     else
       echo "Pas de docker-compose.yml dans ce dossier"
