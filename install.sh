@@ -20,6 +20,7 @@ HOME_FILES=(
 # Files to symlink to $HOME/.config
 CONFIG_FILES=(
   starship.toml
+  starship-ssh.toml
 )
 
 link_file() {

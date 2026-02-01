@@ -63,7 +63,7 @@ style = "bold yellow"
 format = "[$duration]($style) "
 
 [time]
-disabled = true
+disabled = false
 time_format = "%H:%M:%S"
 style = "bold yellow"
 format = " [$time]($style)"
