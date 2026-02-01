@@ -1,4 +1,5 @@
 # Starship prompt config
+# Palette: Catppuccin Mocha
 # Docs: https://starship.rs/config/
 
 # Timeout for commands (ms)
@@ -24,29 +25,29 @@ right_format = "$time"
 [time]
 disabled = false
 time_format = "%H:%M"
-style = "dimmed white"
+style = "#6c7086"
 
 [username]
 show_always = false
-style_user = "bold yellow"
+style_user = "bold #f9e2af"
 format = "[$user]($style)"
 
 [hostname]
 ssh_only = true
-style = "bold yellow"
+style = "bold #fab387"
 format = "[@$hostname]($style) "
 
 [directory]
 truncation_length = 4
 truncate_to_repo = true
-style = "bold cyan"
+style = "bold #89b4fa"
 
 [git_branch]
 symbol = " "
-style = "bold purple"
+style = "bold #cba6f7"
 
 [git_status]
-style = "bold red"
+style = "#f38ba8"
 conflicted = "="
 ahead = "⇡${count}"
 behind = "⇣${count}"
@@ -54,20 +55,20 @@ diverged = "⇕⇡${ahead_count}⇣${behind_count}"
 untracked = "?"
 stashed = "$"
 modified = "!"
-staged = "+"
+staged = "[+](#a6e3a1)"
 renamed = "»"
 deleted = "✘"
 
 [docker_context]
 symbol = " "
-style = "bold blue"
+style = "bold #74c7ec"
 only_with_files = true
 
 [cmd_duration]
 min_time = 2000
-style = "bold yellow"
+style = "#f9e2af"
 format = "[$duration]($style) "
 
 [character]
-success_symbol = "[❯](bold green)"
-error_symbol = "[❯](bold red)"
+success_symbol = "[❯](#a6e3a1)"
+error_symbol = "[❯](#f38ba8)"
