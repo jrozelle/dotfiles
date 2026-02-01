@@ -58,7 +58,9 @@ compinit -C
 # --------------------
 # Synology tweaks
 # --------------------
-# (keybindings maintenant dans la section Bindkey globale)
+if [[ -f /etc/synoinfo.conf ]]; then
+  alias cdd='cd /volume1/docker'
+fi
 
 # --------------------
 # Antidote (plugins)
