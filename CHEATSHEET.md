@@ -151,9 +151,16 @@
 |-------|-------------|
 | `d` | docker |
 | `dc` | docker compose |
-| `dps` | Liste containers (format propre) |
-| `dlog` | Logs en temps réel (200 lignes) |
-| `dexec` | Exec interactif dans container |
+| `dps` | Liste containers actifs |
+| `dpsa` | Liste tous les containers |
+| `dlog <nom>` | Logs en temps réel (200 lignes) |
+| `dexec <nom>` | Exec interactif dans container |
+| `dstats` | Stats CPU/RAM/Network temps réel |
+| `dsh <nom>` | Shell dans container (bash ou sh) |
+| `dre <nom>` | Restart + affiche logs |
+| `dup` | Pull images + rebuild (dans dossier compose) |
+| `dclean` | Nettoyer containers/images/volumes orphelins |
+| `ddf` | Espace disque Docker détaillé |
 
 ## Réseau / Système
 

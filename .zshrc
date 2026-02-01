@@ -198,8 +198,44 @@ if _has docker; then
   alias d='docker'
   alias dc='docker compose'
   alias dps='docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
+  alias dpsa='docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
   alias dlog='docker logs -f --tail=200'
   alias dexec='docker exec -it'
+
+  # Stats temps réel (CPU, RAM, Network)
+  alias dstats='docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}"'
+
+  # Restart rapide
+  dre() { docker restart "$@" && docker logs -f --tail=50 "$1"; }
+
+  # Shell dans un container (bash ou sh)
+  dsh() {
+    docker exec -it "$1" bash 2>/dev/null || docker exec -it "$1" sh
+  }
+
+  # Cleanup (images dangling, containers stoppés, volumes orphelins)
+  dclean() {
+    echo "Containers stoppés:"
+    docker container prune -f
+    echo "\nImages dangling:"
+    docker image prune -f
+    echo "\nVolumes orphelins:"
+    docker volume prune -f
+    echo "\nEspace récupéré:"
+    docker system df
+  }
+
+  # Espace disque Docker
+  alias ddf='docker system df -v'
+
+  # Pull toutes les images et rebuild
+  dup() {
+    if [[ -f docker-compose.yml || -f compose.yml ]]; then
+      docker compose pull && docker compose up -d
+    else
+      echo "Pas de docker-compose.yml dans ce dossier"
+    fi
+  }
 fi
 
 # ====================
