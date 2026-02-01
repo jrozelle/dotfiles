@@ -1,0 +1,9 @@
+{
+    "autoindent": true,
+    "colorscheme": "catppuccin-mocha",
+    "tabsize": 2,
+    "tabstospaces": true,
+    "softwrap": true,
+    "savecursor": true,
+    "scrollbar": true
+}

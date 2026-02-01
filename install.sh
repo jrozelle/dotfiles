@@ -75,6 +75,7 @@ done
 
 # Config directories (nvim, etc.)
 CONFIG_DIRS=(
+  micro
   nvim
 )
 for dir in "${CONFIG_DIRS[@]}"; do
