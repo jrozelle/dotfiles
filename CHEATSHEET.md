@@ -1,6 +1,75 @@
 # Cheatsheet - Les Essentiels
 
-## Navigation Shell
+## Raccourcis Clavier (Ligne de commande)
+
+### Navigation
+
+| Raccourci | Description |
+|-----------|-------------|
+| `Ctrl+A` | Début de ligne |
+| `Ctrl+E` | Fin de ligne |
+| `Ctrl+B` | Reculer d'un caractère |
+| `Ctrl+F` | Avancer d'un caractère |
+| `Option+←` | Mot précédent |
+| `Option+→` | Mot suivant |
+| `Home` | Début de ligne |
+| `End` | Fin de ligne |
+
+### Suppression
+
+| Raccourci | Description |
+|-----------|-------------|
+| `Ctrl+D` | Supprimer caractère sous curseur |
+| `Fn+Backspace` | Supprimer caractère sous curseur |
+| `Ctrl+H` | Supprimer caractère avant (= Backspace) |
+| `Ctrl+W` | Supprimer mot avant |
+| `Option+Backspace` | Supprimer mot avant (smart) |
+| `Ctrl+U` | Supprimer jusqu'au début de ligne |
+| `Ctrl+K` | Supprimer jusqu'à la fin de ligne |
+
+### Sélection (Shift+flèches)
+
+| Raccourci | Description |
+|-----------|-------------|
+| `Shift+←/→` | Sélectionner caractère |
+| `Shift+↑/↓` | Sélectionner ligne |
+| `Shift+Option+←/→` | Sélectionner mot |
+
+*Note : Supprimer avec Backspace, ou copier avec `Ctrl+W` puis coller avec `Ctrl+Y`*
+
+### Copier/Coller (kill ring)
+
+| Raccourci | Description |
+|-----------|-------------|
+| `Ctrl+W` | Couper mot avant (ou sélection) |
+| `Ctrl+Y` | Coller (yank) |
+| `Ctrl+K` | Couper jusqu'à fin de ligne |
+| `Ctrl+U` | Couper jusqu'au début de ligne |
+
+### Historique
+
+| Raccourci | Description |
+|-----------|-------------|
+| `Ctrl+R` | Recherche fuzzy (fzf) |
+| `Ctrl+P` / `↑` | Commande précédente |
+| `Ctrl+N` / `↓` | Commande suivante |
+| `!!` | Répéter dernière commande |
+| `!$` | Dernier argument |
+| `!*` | Tous les arguments |
+
+### Divers
+
+| Raccourci | Description |
+|-----------|-------------|
+| `Ctrl+L` | Effacer écran |
+| `Ctrl+C` | Annuler commande |
+| `Ctrl+Z` | Suspendre processus |
+| `Ctrl+D` | Fermer shell (si ligne vide) |
+| `Ctrl+_` | Annuler dernière édition |
+
+---
+
+## Navigation Dossiers
 
 | Commande | Description |
 |----------|-------------|
@@ -82,9 +151,16 @@
 |-------|-------------|
 | `d` | docker |
 | `dc` | docker compose |
-| `dps` | Liste containers (format propre) |
-| `dlog` | Logs en temps réel (200 lignes) |
-| `dexec` | Exec interactif dans container |
+| `dps` | Liste containers actifs |
+| `dpsa` | Liste tous les containers |
+| `dlog <nom>` | Logs en temps réel (200 lignes) |
+| `dexec <nom>` | Exec interactif dans container |
+| `dstats` | Stats CPU/RAM/Network temps réel |
+| `dsh <nom>` | Shell dans container (bash ou sh) |
+| `dre <nom>` | Restart + affiche logs |
+| `dup` | Pull images + rebuild (dans dossier compose) |
+| `dclean` | Nettoyer containers/images/volumes orphelins |
+| `ddf` | Espace disque Docker détaillé |
 
 ## Réseau / Système
 
