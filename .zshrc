@@ -314,10 +314,6 @@ alias zboot='zsh-bootstrap'
 # --------------------
 # Prompt - GARDER A LA FIN DU FICHIER
 # --------------------
-# Show time in prompt only in SSH sessions
-if [[ -n "$SSH_CONNECTION" ]]; then
-  export STARSHIP_CONFIG="$HOME/.config/starship-ssh.toml"
-fi
 if _has starship; then
   eval "$(starship init zsh)"
 fi
