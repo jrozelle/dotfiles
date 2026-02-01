@@ -86,12 +86,18 @@ done
 
 # Config directories (nvim, etc.)
 CONFIG_DIRS=(
-  micro
   nvim
 )
 for dir in "${CONFIG_DIRS[@]}"; do
   [[ -d "$DOTFILES/$dir" ]] && link_file "$DOTFILES/$dir" "$HOME/.config/$dir"
 done
+
+# micro: only symlink settings.json and colorschemes (micro needs to write runtime files)
+if [[ -d "$DOTFILES/micro" ]]; then
+  mkdir -p "$HOME/.config/micro/colorschemes"
+  [[ -f "$DOTFILES/micro/settings.json" ]] && link_file "$DOTFILES/micro/settings.json" "$HOME/.config/micro/settings.json"
+  [[ -f "$DOTFILES/micro/colorschemes/catppuccin-mocha.micro" ]] && link_file "$DOTFILES/micro/colorschemes/catppuccin-mocha.micro" "$HOME/.config/micro/colorschemes/catppuccin-mocha.micro"
+fi
 
 # Install packages from Brewfile (macOS only)
 if $IS_MAC && command -v brew >/dev/null; then
