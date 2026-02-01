@@ -1,8 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Install Homebrew first (macOS only) - needed for git
-if [[ "$OSTYPE" == darwin* ]] && ! command -v brew >/dev/null; then
+# Detect platform
+IS_SYNOLOGY=false
+IS_MAC=false
+if [[ -f /etc/synoinfo.conf ]]; then
+  IS_SYNOLOGY=true
+elif [[ "$OSTYPE" == darwin* ]]; then
+  IS_MAC=true
+fi
+
+# Synology: check Entware/opkg
+if $IS_SYNOLOGY; then
+  if ! command -v opkg >/dev/null; then
+    echo "ERROR: opkg (Entware) not found on Synology."
+    echo "Install Entware first:"
+    echo "  wget -O - https://bin.entware.net/armv8sf-k3.2/installer/generic.sh | /bin/sh"
+    echo "(adjust URL for your arch: armv8sf-k3.2, x64-k3.2, etc.)"
+    exit 1
+  fi
+  # Ensure git and zsh are available
+  command -v git >/dev/null || { echo "Installing git..."; opkg install git; }
+  command -v zsh >/dev/null || { echo "Installing zsh..."; opkg install zsh; }
+fi
+
+# macOS: install Homebrew if missing
+if $IS_MAC && ! command -v brew >/dev/null; then
   echo "==> Installing Homebrew"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -51,7 +74,7 @@ for file in "${CONFIG_FILES[@]}"; do
 done
 
 # Install packages from Brewfile (macOS only)
-if [[ "$OSTYPE" == darwin* ]] && command -v brew >/dev/null; then
+if $IS_MAC && command -v brew >/dev/null; then
   if [[ -f "$DOTFILES/Brewfile" ]]; then
     echo "==> Installing packages from Brewfile"
     brew bundle --file="$DOTFILES/Brewfile"
@@ -96,11 +119,24 @@ fi
 
 # Check optional tools
 echo
-command -v starship >/dev/null || echo "NOTE: starship not found (brew install starship)"
-command -v eza >/dev/null || echo "NOTE: eza not found (brew install eza)"
+if ! command -v starship >/dev/null; then
+  if $IS_SYNOLOGY; then
+    echo "NOTE: starship not found"
+    echo "  curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b /opt/usr/bin"
+  else
+    echo "NOTE: starship not found (brew install starship)"
+  fi
+fi
+if ! command -v eza >/dev/null; then
+  if $IS_SYNOLOGY; then
+    echo "NOTE: eza not found (opkg install eza)"
+  else
+    echo "NOTE: eza not found (brew install eza)"
+  fi
+fi
 
 # macOS defaults (optional)
-if [[ "$OSTYPE" == darwin* ]] && [[ -f "$DOTFILES/macos.sh" ]]; then
+if $IS_MAC && [[ -f "$DOTFILES/macos.sh" ]]; then
   echo
   read -p "Run macos.sh to configure macOS defaults? [y/N] " -n 1 -r
   echo
