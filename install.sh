@@ -19,9 +19,17 @@ if $IS_SYNOLOGY; then
     echo "(adjust URL for your arch: armv8sf-k3.2, x64-k3.2, etc.)"
     exit 1
   fi
-  # Ensure git and zsh are available
+  # Ensure essentials are available
   command -v git >/dev/null || { echo "Installing git..."; opkg install git; }
   command -v zsh >/dev/null || { echo "Installing zsh..."; opkg install zsh; }
+  command -v nvim >/dev/null || { echo "Installing neovim..."; opkg install neovim; }
+
+  # micro (not in opkg, install from GitHub)
+  if ! command -v micro >/dev/null; then
+    echo "Installing micro..."
+    curl -fsSL https://getmic.ro | bash
+    mv micro /opt/usr/bin/
+  fi
 fi
 
 # macOS: install Homebrew if missing
