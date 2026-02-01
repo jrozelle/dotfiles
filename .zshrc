@@ -192,6 +192,10 @@ fi
 # ====================
 # Aliases: docker
 # ====================
+if _has lazygit; then
+  alias lzg='lazygit'
+fi
+
 if _has docker; then
   alias d='docker'
   alias dc='docker compose'
@@ -233,6 +237,7 @@ bindkey '^[[C' forward-char
 # (zsh-autosuggestions mappe souvent → tout seul, mais pas toujours)
 # Better history behavior
 setopt HIST_IGNORE_DUPS
+setopt HIST_FIND_NO_DUPS
 setopt HIST_IGNORE_SPACE
 setopt SHARE_HISTORY
 setopt INC_APPEND_HISTORY

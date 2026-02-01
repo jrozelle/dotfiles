@@ -99,5 +99,15 @@ echo
 command -v starship >/dev/null || echo "NOTE: starship not found (brew install starship)"
 command -v eza >/dev/null || echo "NOTE: eza not found (brew install eza)"
 
+# macOS defaults (optional)
+if [[ "$OSTYPE" == darwin* ]] && [[ -f "$DOTFILES/macos.sh" ]]; then
+  echo
+  read -p "Run macos.sh to configure macOS defaults? [y/N] " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    "$DOTFILES/macos.sh"
+  fi
+fi
+
 echo
 echo "==> Done. Run: exec zsh"
