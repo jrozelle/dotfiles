@@ -19,6 +19,8 @@ fi
 # --------------------
 export EDITOR=vim
 export VISUAL=vim
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
 
 # --------------------
 # Zsh core
@@ -139,6 +141,13 @@ else
 fi
 if _has rg; then
   alias rg='rg --smart-case'
+fi
+if _has fd; then
+  alias find='fd'
+fi
+if _has bat; then
+  alias cat='bat --paging=never'
+  alias less='bat'
 fi
 
 # ====================
@@ -310,6 +319,13 @@ EOF
   echo "==> Done. Run: exec zsh"
 }
 alias zboot='zsh-bootstrap'
+
+# --------------------
+# fzf (fuzzy finder)
+# --------------------
+if _has fzf; then
+  source <(fzf --zsh 2>/dev/null) || true
+fi
 
 # --------------------
 # Prompt - GARDER A LA FIN DU FICHIER
