@@ -23,9 +23,14 @@ brew "mtr"       # traceroute + ping
 brew "nmap"
 brew "wget"
 
+# Editors
+brew "micro"     # simple terminal editor
+brew "neovim"    # vim on steroids
+
 # Utils
 brew "jq"        # JSON
 brew "tree"
+brew "ripgrep"   # needed for nvim telescope
 
 # Optional GUI apps (uncomment to install)
 cask "iterm2"

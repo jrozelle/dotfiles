@@ -73,6 +73,14 @@ for file in "${CONFIG_FILES[@]}"; do
   [[ -f "$DOTFILES/$file" ]] && link_file "$DOTFILES/$file" "$HOME/.config/$file"
 done
 
+# Config directories (nvim, etc.)
+CONFIG_DIRS=(
+  nvim
+)
+for dir in "${CONFIG_DIRS[@]}"; do
+  [[ -d "$DOTFILES/$dir" ]] && link_file "$DOTFILES/$dir" "$HOME/.config/$dir"
+done
+
 # Install packages from Brewfile (macOS only)
 if $IS_MAC && command -v brew >/dev/null; then
   if [[ -f "$DOTFILES/Brewfile" ]]; then
@@ -132,6 +140,13 @@ if ! command -v eza >/dev/null; then
     echo "NOTE: eza not found (opkg install eza)"
   else
     echo "NOTE: eza not found (brew install eza)"
+  fi
+fi
+if ! command -v nvim >/dev/null; then
+  if $IS_SYNOLOGY; then
+    echo "NOTE: neovim not found (opkg install neovim)"
+  else
+    echo "NOTE: neovim not found (brew install neovim)"
   fi
 fi
 
