@@ -147,6 +147,18 @@ if _has bat; then
 fi
 
 # ====================
+# Aliases: éditeurs
+# ====================
+if _has nvim; then
+  alias v='nvim'
+  alias vi='nvim'
+  alias vim='nvim'
+fi
+if _has micro; then
+  alias m='micro'
+fi
+
+# ====================
 # Aliases: git (essentiels)
 # ====================
 alias gs='git status'
