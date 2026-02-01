@@ -50,6 +50,14 @@ for file in "${CONFIG_FILES[@]}"; do
   [[ -f "$DOTFILES/$file" ]] && link_file "$DOTFILES/$file" "$HOME/.config/$file"
 done
 
+# Install packages from Brewfile (macOS only)
+if [[ "$OSTYPE" == darwin* ]] && command -v brew >/dev/null; then
+  if [[ -f "$DOTFILES/Brewfile" ]]; then
+    echo "==> Installing packages from Brewfile"
+    brew bundle --file="$DOTFILES/Brewfile"
+  fi
+fi
+
 # Bootstrap zsh plugins (antidote)
 echo "==> Bootstrapping zsh plugins"
 

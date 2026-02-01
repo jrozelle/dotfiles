@@ -248,6 +248,15 @@ zsh-bootstrap() {
 
   echo "==> Bootstrapping Zsh environment"
 
+  # 0) Synology: check opkg (Entware)
+  if [[ -f /etc/synoinfo.conf ]] && ! command -v opkg >/dev/null; then
+    echo "ERROR: opkg (Entware) not found on Synology."
+    echo "Install Entware first:"
+    echo "  wget -O - https://bin.entware.net/armv8sf-k3.2/installer/generic.sh | /bin/sh"
+    echo "(adjust URL for your arch: armv8sf-k3.2, x64-k3.2, etc.)"
+    return 1
+  fi
+
   # 1) Antidote
   if [[ ! -f "${antidote_dir}/antidote.zsh" ]]; then
     if ! command -v git >/dev/null; then
@@ -281,8 +290,22 @@ EOF
 
   # 4) Check optional tools
   echo
-  command -v starship >/dev/null || echo "NOTE: starship not found (install: brew install starship | or Synology: curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b /opt/usr/bin)"
-  command -v eza >/dev/null      || echo "NOTE: eza not found (install: brew install eza | or Synology: opkg install eza)"
+  if ! command -v starship >/dev/null; then
+    echo "NOTE: starship not found"
+    if [[ -f /etc/synoinfo.conf ]]; then
+      echo "  curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b /opt/usr/bin"
+    else
+      echo "  brew install starship"
+    fi
+  fi
+  if ! command -v eza >/dev/null; then
+    echo "NOTE: eza not found"
+    if [[ -f /etc/synoinfo.conf ]]; then
+      echo "  opkg install eza"
+    else
+      echo "  brew install eza"
+    fi
+  fi
   echo
   echo "==> Done. Run: exec zsh"
 }
