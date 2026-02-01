@@ -19,6 +19,7 @@ fi
 # --------------------
 export EDITOR=vim
 export VISUAL=vim
+export MICRO_TRUECOLOR=1
 
 # --------------------
 # Zsh core

@@ -1,6 +1,6 @@
 {
     "autoindent": true,
-    "colorscheme": "dracula",
+    "colorscheme": "catppuccin-mocha",
     "tabsize": 2,
     "tabstospaces": true,
     "softwrap": true,
