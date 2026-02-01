@@ -208,6 +208,11 @@ fi
 # ====================
 # Bindkey
 # ====================
+# Emacs mode (Ctrl+A/E pour début/fin de ligne)
+bindkey -e
+bindkey '^A' beginning-of-line
+bindkey '^E' end-of-line
+
 # Mots moins agressifs
 ZSH_DEFAULT_WORDCHARS="$WORDCHARS"
 WORDCHARS="${WORDCHARS//[\/._-]/}"
