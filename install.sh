@@ -27,8 +27,11 @@ if $IS_SYNOLOGY; then
   # micro (not in opkg, install from GitHub)
   if ! command -v micro >/dev/null; then
     echo "Installing micro..."
+    cd /tmp
     curl -fsSL https://getmic.ro | bash
-    mv micro /opt/usr/bin/
+    rm -rf /opt/usr/bin/micro
+    mv -f /tmp/micro /opt/usr/bin/micro
+    cd - >/dev/null
   fi
 fi
 
