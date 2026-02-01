@@ -19,6 +19,13 @@ $cmd_duration\
 $line_break\
 $character"""
 
+right_format = "$time"
+
+[time]
+disabled = false
+time_format = "%H:%M"
+style = "dimmed white"
+
 [username]
 show_always = false
 style_user = "bold yellow"
