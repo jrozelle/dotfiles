@@ -213,6 +213,21 @@ bindkey -e
 bindkey '^A' beginning-of-line
 bindkey '^E' end-of-line
 
+# Fn+Backspace = Delete
+bindkey '^[[3~' delete-char
+
+# Shift+Left/Right = move by word
+bindkey '^[[1;2D' backward-word
+bindkey '^[[1;2C' forward-word
+
+# Option+Left/Right = move by word (alternative)
+bindkey '^[b' backward-word
+bindkey '^[f' forward-word
+
+# Home/End
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
+
 # Mots moins agressifs
 ZSH_DEFAULT_WORDCHARS="$WORDCHARS"
 WORDCHARS="${WORDCHARS//[\/._-]/}"
