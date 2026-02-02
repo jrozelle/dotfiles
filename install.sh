@@ -177,10 +177,15 @@ for dir in "${CONFIG_DIRS[@]}"; do
 done
 
 # micro: only symlink settings.json and colorschemes (micro needs to write runtime files)
+# Skip if ~/.config/micro already points to dotfiles/micro (whole dir symlinked)
 if [[ -d "$DOTFILES/micro" ]]; then
-  mkdir -p "$HOME/.config/micro/colorschemes"
-  [[ -f "$DOTFILES/micro/settings.json" ]] && link_file "$DOTFILES/micro/settings.json" "$HOME/.config/micro/settings.json"
-  [[ -f "$DOTFILES/micro/colorschemes/catppuccin-mocha.micro" ]] && link_file "$DOTFILES/micro/colorschemes/catppuccin-mocha.micro" "$HOME/.config/micro/colorschemes/catppuccin-mocha.micro"
+  if [[ -L "$HOME/.config/micro" && "$(readlink "$HOME/.config/micro")" == "$DOTFILES/micro" ]]; then
+    echo "Skipping micro (already symlinked as directory)"
+  else
+    mkdir -p "$HOME/.config/micro/colorschemes"
+    [[ -f "$DOTFILES/micro/settings.json" ]] && link_file "$DOTFILES/micro/settings.json" "$HOME/.config/micro/settings.json"
+    [[ -f "$DOTFILES/micro/colorschemes/catppuccin-mocha.micro" ]] && link_file "$DOTFILES/micro/colorschemes/catppuccin-mocha.micro" "$HOME/.config/micro/colorschemes/catppuccin-mocha.micro"
+  fi
 fi
 
 # Install packages from Brewfile (macOS only)
