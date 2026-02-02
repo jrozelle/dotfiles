@@ -98,7 +98,7 @@ if $IS_SYNOLOGY; then
   # starship (not in opkg, install from official script)
   if ! command -v starship >/dev/null; then
     echo "Installing starship..."
-    curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b /opt/bin
+    curl -fsSL https://starship.rs/install.sh | sudo sh -s -- -y -b /opt/bin
   fi
 fi
 
