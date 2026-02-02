@@ -38,8 +38,8 @@ if $IS_SYNOLOGY; then
     echo "Installing micro..."
     cd /tmp
     curl -fsSL https://getmic.ro | bash
-    rm -rf /opt/usr/bin/micro
-    mv -f /tmp/micro /opt/usr/bin/micro
+    sudo rm -rf /opt/usr/bin/micro 2>/dev/null
+    sudo mv -f /tmp/micro /opt/usr/bin/micro
     cd - >/dev/null
   fi
 fi
