@@ -71,7 +71,7 @@ if $IS_SYNOLOGY; then
 
   # Update package list
   echo "Updating opkg package list..."
-  opkg update
+  sudo opkg update
 
   # Ensure essentials are available
   command -v git >/dev/null || { echo "Installing git..."; sudo opkg install git; }
