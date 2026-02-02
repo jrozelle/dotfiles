@@ -209,12 +209,8 @@ else
   echo "$PLUGIN_LIST already exists"
 fi
 
-# Build plugin bundle
-if [[ -f "$ANTIDOTE_DIR/antidote.zsh" ]]; then
-  echo "Building plugin bundle..."
-  source "$ANTIDOTE_DIR/antidote.zsh"
-  antidote bundle < "$PLUGIN_LIST" > "$HOME/.zsh_plugins.zsh"
-fi
+# Note: plugin bundle will be built automatically on first zsh launch
+# (antidote.zsh requires zsh, can't be sourced from bash)
 
 
 # macOS defaults (optional)
