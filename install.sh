@@ -94,6 +94,12 @@ if $IS_SYNOLOGY; then
     sudo mkdir -p /opt/share/fzf
     sudo curl -fsSL https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.zsh -o /opt/share/fzf/key-bindings.zsh
   fi
+
+  # starship (not in opkg, install from official script)
+  if ! command -v starship >/dev/null; then
+    echo "Installing starship..."
+    curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b /opt/bin
+  fi
 fi
 
 # macOS: install Homebrew if missing
@@ -204,16 +210,6 @@ if [[ -f "$ANTIDOTE_DIR/antidote.zsh" ]]; then
   antidote bundle < "$PLUGIN_LIST" > "$HOME/.zsh_plugins.zsh"
 fi
 
-# Check optional tools (starship needs manual install on Synology)
-echo
-if ! command -v starship >/dev/null; then
-  if $IS_SYNOLOGY; then
-    echo "NOTE: starship not found"
-    echo "  curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b /opt/usr/bin"
-  else
-    echo "NOTE: starship not found (brew install starship)"
-  fi
-fi
 
 # macOS defaults (optional)
 if $IS_MAC && [[ -f "$DOTFILES/macos.sh" ]]; then
