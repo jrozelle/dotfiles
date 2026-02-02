@@ -65,6 +65,12 @@ if $IS_SYNOLOGY; then
     sudo chmod -R a+rX /opt
   fi
 
+  # Ensure fstab entry exists for persistence (even if bind mount already works)
+  if [[ -d /volume1/@Entware/opt ]] && ! grep -q '/volume1/@Entware/opt /opt' /etc/fstab 2>/dev/null; then
+    echo "Adding bind mount to fstab for persistence..."
+    echo '/volume1/@Entware/opt /opt none bind 0 0' | sudo tee -a /etc/fstab
+  fi
+
   # Fix /opt permissions (Entware sometimes installs with restrictive perms)
   echo "Fixing /opt permissions..."
   sudo chmod -R a+rX /opt
