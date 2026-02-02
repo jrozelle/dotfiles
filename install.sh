@@ -133,6 +133,17 @@ link_file() {
   local src="$1"
   local dst="$2"
 
+  # Resolve real paths to avoid circular symlinks
+  local real_src real_dst_dir
+  real_src="$(cd "$(dirname "$src")" && pwd)/$(basename "$src")"
+  real_dst_dir="$(cd "$(dirname "$dst")" 2>/dev/null && pwd)"
+
+  # Skip if destination would be inside source (circular symlink)
+  if [[ "$real_dst_dir" == "$(dirname "$real_src")"* ]]; then
+    echo "Skipping $dst (already in dotfiles)"
+    return
+  fi
+
   if [[ -L "$dst" ]]; then
     rm "$dst"
   elif [[ -e "$dst" ]]; then
