@@ -69,80 +69,29 @@ require("lazy").setup({
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
+      require("nvim-treesitter").setup({
         ensure_installed = {
           "bash", "dockerfile", "json", "lua", "markdown",
           "markdown_inline", "toml", "yaml", "vim", "vimdoc",
         },
         auto_install = true,
-        highlight = { enable = true },
-        indent = { enable = true },
       })
     end,
   },
 
-  -- LSP
+  -- Mason (LSP installer)
   {
-    "neovim/nvim-lspconfig",
-    dependencies = {
-      "williamboman/mason.nvim",
-      "williamboman/mason-lspconfig.nvim",
-    },
+    "williamboman/mason.nvim",
     config = function()
       require("mason").setup()
+    end,
+  },
+  {
+    "williamboman/mason-lspconfig.nvim",
+    dependencies = { "williamboman/mason.nvim" },
+    config = function()
       require("mason-lspconfig").setup({
-        ensure_installed = { "yamlls", "bashls", "lua_ls" },
-      })
-
-      local lspconfig = require("lspconfig")
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-
-      -- YAML with Docker Compose schemas
-      lspconfig.yamlls.setup({
-        capabilities = capabilities,
-        settings = {
-          yaml = {
-            schemas = {
-              ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = {
-                "docker-compose*.yml",
-                "docker-compose*.yaml",
-                "compose*.yml",
-                "compose*.yaml",
-              },
-            },
-            schemaStore = { enable = true },
-          },
-        },
-      })
-
-      -- Bash
-      lspconfig.bashls.setup({ capabilities = capabilities })
-
-      -- Lua (for nvim config)
-      lspconfig.lua_ls.setup({
-        capabilities = capabilities,
-        settings = {
-          Lua = {
-            runtime = { version = "LuaJIT" },
-            diagnostics = { globals = { "vim" } },
-            workspace = { library = vim.api.nvim_get_runtime_file("", true) },
-            telemetry = { enable = false },
-          },
-        },
-      })
-
-      -- LSP keymaps
-      vim.api.nvim_create_autocmd("LspAttach", {
-        callback = function(event)
-          local map = function(keys, func, desc)
-            vim.keymap.set("n", keys, func, { buffer = event.buf, desc = desc })
-          end
-          map("gd", vim.lsp.buf.definition, "Go to definition")
-          map("gr", vim.lsp.buf.references, "Go to references")
-          map("K", vim.lsp.buf.hover, "Hover documentation")
-          map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
-          map("<leader>ca", vim.lsp.buf.code_action, "Code action")
-        end,
+        ensure_installed = { "lua_ls" },
       })
     end,
   },
@@ -335,5 +284,38 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     if mark[1] > 0 and mark[1] <= lcount then
       pcall(vim.api.nvim_win_set_cursor, 0, mark)
     end
+  end,
+})
+
+-- =============================================================================
+-- LSP Configuration (nvim 0.11+ native API)
+-- =============================================================================
+
+-- Configure lua_ls
+vim.lsp.config.lua_ls = {
+  settings = {
+    Lua = {
+      runtime = { version = "LuaJIT" },
+      diagnostics = { globals = { "vim" } },
+      workspace = { library = vim.api.nvim_get_runtime_file("", true) },
+      telemetry = { enable = false },
+    },
+  },
+}
+
+-- Enable LSP servers
+vim.lsp.enable("lua_ls")
+
+-- LSP keymaps
+vim.api.nvim_create_autocmd("LspAttach", {
+  callback = function(event)
+    local map = function(keys, func, desc)
+      vim.keymap.set("n", keys, func, { buffer = event.buf, desc = desc })
+    end
+    map("gd", vim.lsp.buf.definition, "Go to definition")
+    map("gr", vim.lsp.buf.references, "Go to references")
+    map("K", vim.lsp.buf.hover, "Hover documentation")
+    map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
+    map("<leader>ca", vim.lsp.buf.code_action, "Code action")
   end,
 })
