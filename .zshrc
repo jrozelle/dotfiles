@@ -468,6 +468,9 @@ if _has fzf; then
     source <(fzf --zsh)
   elif [[ -f /opt/homebrew/opt/fzf/shell/key-bindings.zsh ]]; then
     source /opt/homebrew/opt/fzf/shell/key-bindings.zsh
+  elif [[ -f /opt/share/fzf/key-bindings.zsh ]]; then
+    # Entware (Synology)
+    source /opt/share/fzf/key-bindings.zsh
   elif [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
     source /usr/share/fzf/key-bindings.zsh
   elif [[ -f ~/.fzf.zsh ]]; then

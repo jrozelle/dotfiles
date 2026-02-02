@@ -12,35 +12,87 @@ fi
 
 # Synology: check Entware/opkg
 if $IS_SYNOLOGY; then
-  if ! command -v opkg >/dev/null; then
-    # Detect architecture for Entware URL
-    ARCH=$(uname -m)
-    case "$ARCH" in
-      x86_64)  ENTWARE_ARCH="x64-k3.2" ;;
-      aarch64) ENTWARE_ARCH="aarch64-k3.10" ;;
-      armv7l)  ENTWARE_ARCH="armv7sf-k3.2" ;;
-      *)       ENTWARE_ARCH="x64-k3.2" ;;
-    esac
-    echo "ERROR: opkg (Entware) not found on Synology."
-    echo "Detected architecture: $ARCH"
-    echo "Install Entware first (as root):"
-    echo "  wget -O /tmp/entware.sh https://bin.entware.net/${ENTWARE_ARCH}/installer/generic.sh"
-    echo "  sudo /bin/sh /tmp/entware.sh"
-    exit 1
+  # Detect architecture
+  ARCH=$(uname -m)
+  case "$ARCH" in
+    x86_64)  ENTWARE_ARCH="x64-k3.2" ;;
+    aarch64) ENTWARE_ARCH="aarch64-k3.10" ;;
+    armv7l)  ENTWARE_ARCH="armv7sf-k3.2" ;;
+    *)       ENTWARE_ARCH="x64-k3.2" ;;
+  esac
+
+  # Check if /opt is on rootfs (bad - will be wiped on DSM update)
+  if [[ ! -L /opt ]] && df /opt 2>/dev/null | grep -q '/dev/md0'; then
+    echo "WARNING: /opt is on rootfs (/dev/md0) - fixing..."
+    echo "Moving Entware to /volume1/@Entware/opt with bind mount..."
+
+    # Move existing /opt content to volume
+    sudo mkdir -p /volume1/@Entware
+    sudo mv /opt /volume1/@Entware/opt
+
+    # Create bind mount
+    sudo mkdir -p /opt
+    if ! grep -q '/volume1/@Entware/opt /opt' /etc/fstab 2>/dev/null; then
+      echo '/volume1/@Entware/opt /opt none bind 0 0' | sudo tee -a /etc/fstab
+    fi
+    sudo mount /opt
+
+    echo "Entware relocated to volume successfully."
   fi
+
+  if ! command -v opkg >/dev/null; then
+    echo "Entware not found. Installing..."
+
+    # Create Entware directory on volume
+    sudo mkdir -p /volume1/@Entware/opt
+
+    # Set up bind mount if not already
+    if [[ ! -d /opt ]]; then
+      sudo mkdir -p /opt
+    fi
+    if ! grep -q '/volume1/@Entware/opt /opt' /etc/fstab 2>/dev/null; then
+      echo '/volume1/@Entware/opt /opt none bind 0 0' | sudo tee -a /etc/fstab
+    fi
+    if ! mountpoint -q /opt 2>/dev/null; then
+      sudo mount /opt
+    fi
+
+    # Run Entware installer
+    echo "Downloading Entware installer for $ARCH..."
+    curl -fsSL "https://bin.entware.net/${ENTWARE_ARCH}/installer/generic.sh" -o /tmp/entware.sh
+    sudo /bin/sh /tmp/entware.sh
+    rm -f /tmp/entware.sh
+    sudo chmod -R a+rX /opt
+  fi
+
+  # Fix /opt permissions (Entware sometimes installs with restrictive perms)
+  echo "Fixing /opt permissions..."
+  sudo chmod -R a+rX /opt
+
+  # Update package list
+  echo "Updating opkg package list..."
+  opkg update
+
   # Ensure essentials are available
-  command -v git >/dev/null || { echo "Installing git..."; opkg install git; }
-  command -v zsh >/dev/null || { echo "Installing zsh..."; opkg install zsh; }
-  command -v nvim >/dev/null || { echo "Installing neovim..."; opkg install neovim; }
+  command -v git >/dev/null || { echo "Installing git..."; sudo opkg install git; }
+  command -v zsh >/dev/null || { echo "Installing zsh..."; sudo opkg install zsh; }
+  command -v nvim >/dev/null || { echo "Installing neovim..."; sudo opkg install neovim; }
+  command -v eza >/dev/null || { echo "Installing eza..."; sudo opkg install eza; }
+  command -v fzf >/dev/null || { echo "Installing fzf..."; sudo opkg install fzf; }
 
   # micro (not in opkg, install from GitHub)
   if ! command -v micro >/dev/null; then
     echo "Installing micro..."
-    cd /tmp
-    curl -fsSL https://getmic.ro | bash
-    sudo rm -rf /opt/usr/bin/micro 2>/dev/null
-    sudo mv -f /tmp/micro /opt/usr/bin/micro
-    cd - >/dev/null
+    (cd /tmp && curl -fsSL https://getmic.ro | bash)
+    sudo cp -f /tmp/micro /opt/bin/micro
+    rm -f /tmp/micro
+  fi
+
+  # fzf shell integration (opkg version may not include it)
+  if [[ ! -f /opt/share/fzf/key-bindings.zsh ]]; then
+    echo "Installing fzf shell integration..."
+    sudo mkdir -p /opt/share/fzf
+    sudo curl -fsSL https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.zsh -o /opt/share/fzf/key-bindings.zsh
   fi
 fi
 
@@ -152,7 +204,7 @@ if [[ -f "$ANTIDOTE_DIR/antidote.zsh" ]]; then
   antidote bundle < "$PLUGIN_LIST" > "$HOME/.zsh_plugins.zsh"
 fi
 
-# Check optional tools
+# Check optional tools (starship needs manual install on Synology)
 echo
 if ! command -v starship >/dev/null; then
   if $IS_SYNOLOGY; then
@@ -160,20 +212,6 @@ if ! command -v starship >/dev/null; then
     echo "  curl -fsSL https://starship.rs/install.sh | sh -s -- -y -b /opt/usr/bin"
   else
     echo "NOTE: starship not found (brew install starship)"
-  fi
-fi
-if ! command -v eza >/dev/null; then
-  if $IS_SYNOLOGY; then
-    echo "NOTE: eza not found (opkg install eza)"
-  else
-    echo "NOTE: eza not found (brew install eza)"
-  fi
-fi
-if ! command -v nvim >/dev/null; then
-  if $IS_SYNOLOGY; then
-    echo "NOTE: neovim not found (opkg install neovim)"
-  else
-    echo "NOTE: neovim not found (brew install neovim)"
   fi
 fi
 
