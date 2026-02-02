@@ -52,6 +52,7 @@ zstyle ':completion:*' matcher-list \
 if [[ -d /opt/homebrew/share/zsh/site-functions ]]; then
   fpath=(/opt/homebrew/share/zsh/site-functions $fpath)
 fi
+[[ -d ~/.zsh/completions ]] && fpath=(~/.zsh/completions $fpath)
 autoload -Uz compinit
 compinit -C
 
@@ -209,6 +210,11 @@ if _has lazygit; then
 fi
 
 if _has docker; then
+  # Generate docker completions if missing
+  if [[ ! -f ~/.zsh/completions/_docker ]] && docker completion zsh &>/dev/null; then
+    mkdir -p ~/.zsh/completions
+    docker completion zsh > ~/.zsh/completions/_docker
+  fi
   alias d='docker'
   alias dc='docker compose'
   alias dps='docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
