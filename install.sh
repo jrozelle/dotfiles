@@ -13,10 +13,18 @@ fi
 # Synology: check Entware/opkg
 if $IS_SYNOLOGY; then
   if ! command -v opkg >/dev/null; then
+    # Detect architecture for Entware URL
+    ARCH=$(uname -m)
+    case "$ARCH" in
+      x86_64)  ENTWARE_ARCH="x64-k3.2" ;;
+      aarch64) ENTWARE_ARCH="aarch64-k3.10" ;;
+      armv7l)  ENTWARE_ARCH="armv7sf-k3.2" ;;
+      *)       ENTWARE_ARCH="x64-k3.2" ;;
+    esac
     echo "ERROR: opkg (Entware) not found on Synology."
+    echo "Detected architecture: $ARCH"
     echo "Install Entware first:"
-    echo "  wget -O - https://bin.entware.net/armv8sf-k3.2/installer/generic.sh | /bin/sh"
-    echo "(adjust URL for your arch: armv8sf-k3.2, x64-k3.2, etc.)"
+    echo "  wget -O - https://bin.entware.net/${ENTWARE_ARCH}/installer/generic.sh | /bin/sh"
     exit 1
   fi
   # Ensure essentials are available
