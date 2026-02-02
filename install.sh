@@ -23,8 +23,9 @@ if $IS_SYNOLOGY; then
     esac
     echo "ERROR: opkg (Entware) not found on Synology."
     echo "Detected architecture: $ARCH"
-    echo "Install Entware first:"
-    echo "  wget -O - https://bin.entware.net/${ENTWARE_ARCH}/installer/generic.sh | /bin/sh"
+    echo "Install Entware first (as root):"
+    echo "  wget -O /tmp/entware.sh https://bin.entware.net/${ENTWARE_ARCH}/installer/generic.sh"
+    echo "  sudo /bin/sh /tmp/entware.sh"
     exit 1
   fi
   # Ensure essentials are available
