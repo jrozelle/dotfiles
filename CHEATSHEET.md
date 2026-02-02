@@ -362,7 +362,7 @@ Le prompt affiche automatiquement :
 
 ## Bootstrap
 
-### macOS (nouveau Mac)
+### macOS
 ```bash
 git clone https://github.com/jrozelle/dotfiles.git ~/dotfiles
 cd ~/dotfiles && ./install.sh
@@ -371,16 +371,13 @@ exec zsh
 
 ### Synology
 ```bash
-# 1. Installer Entware d'abord (si pas fait)
-# wget -O - https://bin.entware.net/x64-k3.2/installer/generic.sh | /bin/sh
-
 git clone https://github.com/jrozelle/dotfiles.git ~/dotfiles
 cd ~/dotfiles && ./install.sh
 exec zsh
 ```
+*Note : install.sh installe automatiquement Entware si absent.*
 
-### Mise à jour plugins zsh
+### Mise à jour
 ```bash
-zboot
-exec zsh
+cd ~/dotfiles && git pull && exec zsh
 ```
