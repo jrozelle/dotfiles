@@ -79,15 +79,17 @@ require("lazy").setup({
     end,
   },
 
-  -- Mason (LSP installer)
+  -- Mason (LSP installer) - skip on Synology
   {
     "williamboman/mason.nvim",
+    cond = function() return vim.fn.filereadable("/etc/synoinfo.conf") == 0 end,
     config = function()
       require("mason").setup()
     end,
   },
   {
     "williamboman/mason-lspconfig.nvim",
+    cond = function() return vim.fn.filereadable("/etc/synoinfo.conf") == 0 end,
     dependencies = { "williamboman/mason.nvim" },
     config = function()
       require("mason-lspconfig").setup({
@@ -288,34 +290,36 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 })
 
 -- =============================================================================
--- LSP Configuration (nvim 0.11+ native API)
+-- LSP Configuration (nvim 0.11+ native API) - skip on Synology
 -- =============================================================================
 
--- Configure lua_ls
-vim.lsp.config.lua_ls = {
-  settings = {
-    Lua = {
-      runtime = { version = "LuaJIT" },
-      diagnostics = { globals = { "vim" } },
-      workspace = { library = vim.api.nvim_get_runtime_file("", true) },
-      telemetry = { enable = false },
+if vim.fn.filereadable("/etc/synoinfo.conf") == 0 then
+  -- Configure lua_ls
+  vim.lsp.config.lua_ls = {
+    settings = {
+      Lua = {
+        runtime = { version = "LuaJIT" },
+        diagnostics = { globals = { "vim" } },
+        workspace = { library = vim.api.nvim_get_runtime_file("", true) },
+        telemetry = { enable = false },
+      },
     },
-  },
-}
+  }
 
--- Enable LSP servers
-vim.lsp.enable("lua_ls")
+  -- Enable LSP servers
+  vim.lsp.enable("lua_ls")
 
--- LSP keymaps
-vim.api.nvim_create_autocmd("LspAttach", {
-  callback = function(event)
-    local map = function(keys, func, desc)
-      vim.keymap.set("n", keys, func, { buffer = event.buf, desc = desc })
-    end
-    map("gd", vim.lsp.buf.definition, "Go to definition")
-    map("gr", vim.lsp.buf.references, "Go to references")
-    map("K", vim.lsp.buf.hover, "Hover documentation")
-    map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
-    map("<leader>ca", vim.lsp.buf.code_action, "Code action")
-  end,
-})
+  -- LSP keymaps
+  vim.api.nvim_create_autocmd("LspAttach", {
+    callback = function(event)
+      local map = function(keys, func, desc)
+        vim.keymap.set("n", keys, func, { buffer = event.buf, desc = desc })
+      end
+      map("gd", vim.lsp.buf.definition, "Go to definition")
+      map("gr", vim.lsp.buf.references, "Go to references")
+      map("K", vim.lsp.buf.hover, "Hover documentation")
+      map("<leader>rn", vim.lsp.buf.rename, "Rename symbol")
+      map("<leader>ca", vim.lsp.buf.code_action, "Code action")
+    end,
+  })
+end
