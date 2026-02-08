@@ -6,6 +6,7 @@
 	editor = vim
 	autocrlf = input
 	pager = less -FRX
+	excludesfile = /var/services/homes/julien/.gitignore_global
 
 [init]
 	defaultBranch = main
