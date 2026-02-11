@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git push)",
+      "Bash(git -C /Users/julien/Documents/git/dotfiles add .gitconfig)",
+      "Bash(git -C /Users/julien/Documents/git/dotfiles commit -m \"$\\(cat <<''EOF''\nadd gitconfig with sensible defaults\n\n- pull.rebase, push.autoSetupRemote, fetch.prune\n- rebase.autoStash for seamless rebasing\n- diff3 conflict style for better merge resolution\n- useful aliases \\(lg, undo, unstage\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /Users/julien/Documents/git/dotfiles push)"
+    ]
+  }
+}

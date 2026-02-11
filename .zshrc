@@ -220,6 +220,7 @@ if _has docker; then
   alias dps='docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
   alias dpsa='docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
   alias dlog='docker logs -f --tail=200'
+  alias dclog='docker compose logs -f --tail=200'
   alias dexec='docker exec -it'
 
   # Stats temps réel (CPU, RAM, Network)
