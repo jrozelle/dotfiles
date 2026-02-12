@@ -21,26 +21,28 @@ if $IS_SYNOLOGY; then
     *)       ENTWARE_ARCH="x64-k3.2" ;;
   esac
 
-  # Check if /opt is on rootfs (bad - will be wiped on DSM update)
-  if [[ ! -L /opt ]] && df /opt 2>/dev/null | grep -q '/dev/md0'; then
-    echo "WARNING: /opt is on rootfs (/dev/md0) - fixing..."
-    echo "Moving Entware to /volume1/@Entware/opt with bind mount..."
+  # Ensure /opt is backed by a volume (rootfs /dev/md0 gets wiped on DSM update)
+  if ! mountpoint -q /opt 2>/dev/null && df /opt 2>/dev/null | grep -q '/dev/md0'; then
+    echo "WARNING: /opt is on rootfs (/dev/md0) - relocating to volume..."
+    sudo mkdir -p /volume1/@Entware/opt
 
-    # Move existing /opt content to volume
-    sudo mkdir -p /volume1/@Entware
-    sudo mv /opt /volume1/@Entware/opt
+    # Copy contents (not the dir itself) to avoid nested opt/opt
+    if [[ -d /opt/bin || -d /opt/lib ]]; then
+      echo "Copying existing /opt contents to /volume1/@Entware/opt..."
+      sudo cp -a /opt/. /volume1/@Entware/opt/
+    fi
 
-    # Create bind mount
+    # Set up bind mount
     sudo mkdir -p /opt
     if ! grep -q '/volume1/@Entware/opt /opt' /etc/fstab 2>/dev/null; then
       echo '/volume1/@Entware/opt /opt none bind 0 0' | sudo tee -a /etc/fstab
     fi
     sudo mount /opt
 
-    echo "Entware relocated to volume successfully."
+    echo "/opt is now backed by /volume1/@Entware/opt."
   fi
 
-  if ! command -v opkg >/dev/null; then
+  if ! command -v opkg >/dev/null && [[ ! -x /opt/bin/opkg ]]; then
     echo "Entware not found. Installing..."
 
     # Create Entware directory on volume
@@ -73,10 +75,6 @@ if $IS_SYNOLOGY; then
     echo "Adding bind mount to fstab for persistence..."
     echo '/volume1/@Entware/opt /opt none bind 0 0' | sudo tee -a /etc/fstab
   fi
-
-  # Fix /opt permissions (Entware sometimes installs with restrictive perms)
-  echo "Fixing /opt permissions..."
-  sudo chmod -R a+rX /opt
 
   # Update package list
   echo "Updating opkg package list..."
