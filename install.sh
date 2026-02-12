@@ -65,6 +65,9 @@ if $IS_SYNOLOGY; then
     sudo chmod -R a+rX /opt
   fi
 
+  # Add Entware to PATH for this session so commands are found
+  export PATH="/opt/bin:/opt/sbin:$PATH"
+
   # Ensure fstab entry exists for persistence (even if bind mount already works)
   if [[ -d /volume1/@Entware/opt ]] && ! grep -q '/volume1/@Entware/opt /opt' /etc/fstab 2>/dev/null; then
     echo "Adding bind mount to fstab for persistence..."
@@ -77,14 +80,14 @@ if $IS_SYNOLOGY; then
 
   # Update package list
   echo "Updating opkg package list..."
-  sudo opkg update
+  sudo /opt/bin/opkg update
 
   # Ensure essentials are available
-  command -v git >/dev/null || { echo "Installing git..."; sudo opkg install git; }
-  command -v zsh >/dev/null || { echo "Installing zsh..."; sudo opkg install zsh; }
-  command -v nvim >/dev/null || { echo "Installing neovim..."; sudo opkg install neovim; }
-  command -v eza >/dev/null || { echo "Installing eza..."; sudo opkg install eza; }
-  command -v fzf >/dev/null || { echo "Installing fzf..."; sudo opkg install fzf; }
+  command -v git >/dev/null || { echo "Installing git..."; sudo /opt/bin/opkg install git; }
+  command -v zsh >/dev/null || { echo "Installing zsh..."; sudo /opt/bin/opkg install zsh; }
+  command -v nvim >/dev/null || { echo "Installing neovim..."; sudo /opt/bin/opkg install neovim; }
+  command -v eza >/dev/null || { echo "Installing eza..."; sudo /opt/bin/opkg install eza; }
+  command -v fzf >/dev/null || { echo "Installing fzf..."; sudo /opt/bin/opkg install fzf; }
 
   # micro (not in opkg, install from GitHub)
   if ! command -v micro >/dev/null; then
