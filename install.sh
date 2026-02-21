@@ -206,84 +206,102 @@ if $IS_SYNOLOGY; then
     fi
   fi
 
-  # duf (df moderne — GitHub releases)
+  # _gh_dl_url OWNER/REPO GREP_PATTERN
+  # Récupère le browser_download_url depuis l'API GitHub (|| true = safe avec set -e)
+  _gh_dl_url() {
+    curl -fsSL "https://api.github.com/repos/$1/releases/latest" \
+      | grep '"browser_download_url"' | grep "$2" | head -1 \
+      | sed 's/.*"browser_download_url": *"\([^"]*\)".*/\1/' || true
+  }
+
+  # duf (df moderne)
   if ! duf --version >/dev/null 2>&1; then
     echo "Installing duf..."
-    DUF_VER=$(curl -fsSL https://api.github.com/repos/muesli/duf/releases/latest \
-      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
     case "$ARCH" in
-      x86_64)  DUF_ARCH="linux_amd64" ;;
-      aarch64) DUF_ARCH="linux_arm64" ;;
-      armv7l)  DUF_ARCH="linux_armv7" ;;
-      *)       DUF_ARCH="" ;;
+      x86_64)  _pat="linux_amd64.tar.gz" ;;
+      aarch64) _pat="linux_arm64.tar.gz" ;;
+      armv7l)  _pat="linux_armv7.tar.gz" ;;
+      *)       _pat="" ;;
     esac
-    if [[ -n "$DUF_ARCH" && -n "$DUF_VER" ]]; then
-      curl -fsSL "https://github.com/muesli/duf/releases/download/v${DUF_VER}/duf_${DUF_VER}_${DUF_ARCH}.tar.gz" \
-        | tar xz -C /tmp duf
-      sudo cp -f /tmp/duf "$ENTWARE_ROOT/bin/duf"
-      sudo chmod 755 "$ENTWARE_ROOT/bin/duf"
-      rm -f /tmp/duf
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url muesli/duf "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/duf-install
+        curl -fsSL "$_url" | tar xz -C /tmp/duf-install
+        sudo cp -f /tmp/duf-install/duf "$ENTWARE_ROOT/bin/duf"
+        sudo chmod 755 "$ENTWARE_ROOT/bin/duf"
+        rm -rf /tmp/duf-install
+      fi
     fi
   fi
 
-  # glow (markdown viewer — GitHub releases)
+  # glow (markdown viewer)
   if ! glow --version >/dev/null 2>&1; then
     echo "Installing glow..."
-    GLOW_VER=$(curl -fsSL https://api.github.com/repos/charmbracelet/glow/releases/latest \
-      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
     case "$ARCH" in
-      x86_64)  GLOW_ARCH="Linux_x86_64" ;;
-      aarch64) GLOW_ARCH="Linux_arm64" ;;
-      armv7l)  GLOW_ARCH="Linux_armv7" ;;
-      *)       GLOW_ARCH="" ;;
+      x86_64)  _pat="Linux_x86_64.tar.gz" ;;
+      aarch64) _pat="Linux_arm64.tar.gz"  ;;
+      armv7l)  _pat="Linux_armv7.tar.gz"  ;;
+      *)       _pat="" ;;
     esac
-    if [[ -n "$GLOW_ARCH" && -n "$GLOW_VER" ]]; then
-      curl -fsSL "https://github.com/charmbracelet/glow/releases/download/v${GLOW_VER}/glow_${GLOW_VER}_${GLOW_ARCH}.tar.gz" \
-        | tar xz -C /tmp glow
-      sudo cp -f /tmp/glow "$ENTWARE_ROOT/bin/glow"
-      sudo chmod 755 "$ENTWARE_ROOT/bin/glow"
-      rm -f /tmp/glow
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url charmbracelet/glow "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/glow-install
+        curl -fsSL "$_url" | tar xz -C /tmp/glow-install
+        sudo cp -f /tmp/glow-install/glow "$ENTWARE_ROOT/bin/glow"
+        sudo chmod 755 "$ENTWARE_ROOT/bin/glow"
+        rm -rf /tmp/glow-install
+      fi
     fi
   fi
 
-  # sd (sed moderne — GitHub releases, musl static)
+  # sd (sed moderne — musl static)
   if ! sd --version >/dev/null 2>&1; then
     echo "Installing sd..."
-    SD_VER=$(curl -fsSL https://api.github.com/repos/chmln/sd/releases/latest \
-      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
     case "$ARCH" in
-      x86_64)  SD_ARCH="x86_64-unknown-linux-musl" ;;
-      aarch64) SD_ARCH="aarch64-unknown-linux-musl" ;;
-      *)       SD_ARCH="" ;;
+      x86_64)  _pat="x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="aarch64-unknown-linux-musl.tar.gz" ;;
+      *)       _pat="" ;;
     esac
-    if [[ -n "$SD_ARCH" && -n "$SD_VER" ]]; then
-      curl -fsSL "https://github.com/chmln/sd/releases/download/v${SD_VER}/sd-v${SD_VER}-${SD_ARCH}.tar.gz" \
-        | tar xz -C /tmp
-      sudo cp -f "/tmp/sd-v${SD_VER}-${SD_ARCH}/sd" "$ENTWARE_ROOT/bin/sd"
-      sudo chmod 755 "$ENTWARE_ROOT/bin/sd"
-      rm -rf "/tmp/sd-v${SD_VER}-${SD_ARCH}"
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url chmln/sd "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/sd-install
+        curl -fsSL "$_url" | tar xz -C /tmp/sd-install
+        # binaire peut être à la racine ou dans un sous-répertoire
+        _sd_bin=$(find /tmp/sd-install -name sd -type f | head -1)
+        if [[ -n "$_sd_bin" ]]; then
+          sudo cp -f "$_sd_bin" "$ENTWARE_ROOT/bin/sd"
+          sudo chmod 755 "$ENTWARE_ROOT/bin/sd"
+        fi
+        rm -rf /tmp/sd-install
+      fi
     fi
   fi
 
-  # procs (ps moderne — GitHub releases, zip)
+  # procs (ps moderne — zip)
   if ! procs --version >/dev/null 2>&1; then
     echo "Installing procs..."
-    PROCS_VER=$(curl -fsSL https://api.github.com/repos/dalance/procs/releases/latest \
-      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
     case "$ARCH" in
-      x86_64)  PROCS_ARCH="x86_64-linux" ;;
-      aarch64) PROCS_ARCH="aarch64-linux" ;;
-      *)       PROCS_ARCH="" ;;
+      x86_64)  _pat="x86_64-linux.zip" ;;
+      aarch64) _pat="aarch64-linux.zip" ;;
+      *)       _pat="" ;;
     esac
-    if [[ -n "$PROCS_ARCH" && -n "$PROCS_VER" ]]; then
-      curl -fsSL "https://github.com/dalance/procs/releases/download/v${PROCS_VER}/procs-v${PROCS_VER}-${PROCS_ARCH}.zip" \
-        -o /tmp/procs.zip
-      unzip -q -o /tmp/procs.zip procs -d /tmp
-      sudo cp -f /tmp/procs "$ENTWARE_ROOT/bin/procs"
-      sudo chmod 755 "$ENTWARE_ROOT/bin/procs"
-      rm -f /tmp/procs.zip /tmp/procs
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url dalance/procs "$_pat")
+      if [[ -n "$_url" ]]; then
+        curl -fsSL "$_url" -o /tmp/procs.zip
+        unzip -q -o /tmp/procs.zip procs -d /tmp
+        sudo cp -f /tmp/procs "$ENTWARE_ROOT/bin/procs"
+        sudo chmod 755 "$ENTWARE_ROOT/bin/procs"
+        rm -f /tmp/procs.zip /tmp/procs
+      fi
     fi
   fi
+
+  unset -f _gh_dl_url
+  unset _pat _url _sd_bin
 
   # Ensure all manually-installed binaries are executable (idempotent — fixes
   # previous runs where cp was done without chmod, or where chmod was skipped)
