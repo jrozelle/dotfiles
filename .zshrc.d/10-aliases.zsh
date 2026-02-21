@@ -127,7 +127,7 @@ if [[ "$_os" == mac ]]; then
 fi
 
 # ====================
-# Aliases: docker
+# Aliases: lazygit
 # ====================
 if _has lazygit; then
   alias lzg='lazygit'

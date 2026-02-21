@@ -322,11 +322,68 @@ if $IS_SYNOLOGY; then
     fi
   fi
 
+  # ripgrep (requis pour nvim telescope)
+  if ! command -v rg >/dev/null; then
+    echo "Installing ripgrep..."
+    case "$ARCH" in
+      x86_64)  _pat="x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="aarch64-unknown-linux-gnu.tar.gz" ;;
+      armv7l)  _pat="armv7-unknown-linux-musleabihf.tar.gz" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url BurntSushi/ripgrep "$_pat")
+      [[ -n "$_url" ]] && mkdir -p /tmp/rg-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/rg-install \
+        && _install_bin /tmp/rg-install rg "$ENTWARE_ROOT/bin" \
+        && rm -rf /tmp/rg-install
+    fi
+    unset _pat _url
+  fi
+
+  # fd (find moderne)
+  if ! command -v fd >/dev/null; then
+    echo "Installing fd..."
+    case "$ARCH" in
+      x86_64)  _pat="x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="aarch64-unknown-linux-musl.tar.gz" ;;
+      armv7l)  _pat="arm-unknown-linux-musleabihf.tar.gz" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url sharkdp/fd "$_pat")
+      [[ -n "$_url" ]] && mkdir -p /tmp/fd-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/fd-install \
+        && _install_bin /tmp/fd-install fd "$ENTWARE_ROOT/bin" \
+        && rm -rf /tmp/fd-install
+    fi
+    unset _pat _url
+  fi
+
+  # lazygit
+  if ! command -v lazygit >/dev/null; then
+    echo "Installing lazygit..."
+    case "$ARCH" in
+      x86_64)  _pat="Linux_x86_64.tar.gz" ;;
+      aarch64) _pat="Linux_arm64.tar.gz" ;;
+      armv7l)  _pat="Linux_armv7.tar.gz" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url jesseduffield/lazygit "$_pat")
+      [[ -n "$_url" ]] && mkdir -p /tmp/lazygit-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/lazygit-install \
+        && _install_bin /tmp/lazygit-install lazygit "$ENTWARE_ROOT/bin" \
+        && rm -rf /tmp/lazygit-install
+    fi
+    unset _pat _url
+  fi
+
   unset _pat _url _b
 
   # Ensure all manually-installed binaries are executable (idempotent — fixes
   # previous runs where cp was done without chmod, or where chmod was skipped)
-  for _bin in bat delta gh tldr duf glow sd procs; do
+  for _bin in bat delta gh tldr duf glow sd procs rg fd lazygit; do
     [[ -f "$ENTWARE_ROOT/bin/$_bin" ]] && sudo chmod 755 "$ENTWARE_ROOT/bin/$_bin"
   done
   unset _bin
