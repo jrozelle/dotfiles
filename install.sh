@@ -81,6 +81,9 @@ if $IS_SYNOLOGY; then
   command -v eza >/dev/null  || { echo "Installing eza...";    sudo "$ENTWARE_ROOT/bin/opkg" install eza; }
   command -v fzf >/dev/null  || { echo "Installing fzf...";    sudo "$ENTWARE_ROOT/bin/opkg" install fzf; }
   command -v htop >/dev/null || { echo "Installing htop...";   sudo "$ENTWARE_ROOT/bin/opkg" install htop; }
+  command -v tmux >/dev/null || { echo "Installing tmux...";   sudo "$ENTWARE_ROOT/bin/opkg" install tmux; }
+  command -v ncdu >/dev/null || { echo "Installing ncdu...";   sudo "$ENTWARE_ROOT/bin/opkg" install ncdu; }
+  command -v tldr >/dev/null || { echo "Installing tldr...";   sudo "$ENTWARE_ROOT/bin/opkg" install tldr; }
 
   # micro (not in opkg, install from GitHub)
   if ! command -v micro >/dev/null; then

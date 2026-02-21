@@ -7,6 +7,9 @@ if [[ -d /opt/bin || -d /opt/usr/bin ]]; then
   export PATH="/opt/bin:/opt/sbin:/opt/usr/bin:/opt/usr/sbin:$PATH"
 fi
 
+# Éliminer les doublons dans PATH (cause du "where" qui affiche 3x)
+typeset -U PATH path
+
 # Homebrew (macOS): keep brew first if present
 if [[ -x /opt/homebrew/bin/brew ]]; then
   eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -17,8 +20,16 @@ fi
 # --------------------
 # Environment
 # --------------------
-export EDITOR=vim
-export VISUAL=vim
+if command -v nvim >/dev/null 2>&1; then
+  export EDITOR=nvim
+  export VISUAL=nvim
+elif command -v micro >/dev/null 2>&1; then
+  export EDITOR=micro
+  export VISUAL=micro
+else
+  export EDITOR=vim
+  export VISUAL=vim
+fi
 export MICRO_TRUECOLOR=1
 
 # --------------------
@@ -54,7 +65,12 @@ if [[ -d /opt/homebrew/share/zsh/site-functions ]]; then
 fi
 [[ -d ~/.zsh/completions ]] && fpath=(~/.zsh/completions $fpath)
 autoload -Uz compinit
-compinit -C
+# Régénère le cache toutes les 24h, sinon utilise le cache existant
+if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
 
 # --------------------
 # Antidote (plugins)

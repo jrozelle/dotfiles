@@ -95,6 +95,16 @@ alias gds='git diff --staged'
 alias glog='git log --oneline --decorate --graph --all -n 25'
 
 # ====================
+# Aliases: outils modernes
+# ====================
+if _has duf; then
+  alias df='duf'
+fi
+if _has glow; then
+  alias md='glow'
+fi
+
+# ====================
 # Aliases: réseau / system
 # ====================
 if [[ "$_os" == mac ]]; then
