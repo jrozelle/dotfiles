@@ -132,11 +132,23 @@ if $IS_SYNOLOGY; then
     curl -fsSL https://starship.rs/install.sh | sudo sh -s -- -y -b "$ENTWARE_ROOT/bin"
   fi
 
-  # zoxide (smart cd — not in opkg, install from official script)
+  # zoxide (smart cd — GitHub releases, not in opkg)
   if ! command -v zoxide >/dev/null; then
     echo "Installing zoxide..."
-    curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh \
-      | BIN_DIR="$ENTWARE_ROOT/bin" bash
+    case "$ARCH" in
+      x86_64)  ZOXIDE_ARCH="x86_64-unknown-linux-musl" ;;
+      aarch64) ZOXIDE_ARCH="aarch64-unknown-linux-musl" ;;
+      armv7l)  ZOXIDE_ARCH="armv7-unknown-linux-musleabihf" ;;
+      *)       ZOXIDE_ARCH="" ;;
+    esac
+    if [[ -n "$ZOXIDE_ARCH" ]]; then
+      _url=$(_gh_dl_url ajeetdsouza/zoxide "${ZOXIDE_ARCH}.tar.gz")
+      [[ -n "$_url" ]] && mkdir -p /tmp/zoxide-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/zoxide-install \
+        && _install_bin /tmp/zoxide-install zoxide "$ENTWARE_ROOT/bin" \
+        && rm -rf /tmp/zoxide-install
+    fi
+    unset ZOXIDE_ARCH _url
   fi
 
   # delta (better git diff — GitHub releases, not in opkg)
@@ -432,8 +444,20 @@ if $IS_LINUX; then
   # --- zoxide ---
   if ! command -v zoxide >/dev/null; then
     echo "Installing zoxide..."
-    curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh \
-      | BIN_DIR="$DEST" bash
+    case "$ARCH" in
+      x86_64)  ZOXIDE_ARCH="x86_64-unknown-linux-musl" ;;
+      aarch64) ZOXIDE_ARCH="aarch64-unknown-linux-musl" ;;
+      armv7l)  ZOXIDE_ARCH="armv7-unknown-linux-musleabihf" ;;
+      *)       ZOXIDE_ARCH="" ;;
+    esac
+    if [[ -n "$ZOXIDE_ARCH" ]]; then
+      _url=$(_gh_dl_url ajeetdsouza/zoxide "${ZOXIDE_ARCH}.tar.gz")
+      [[ -n "$_url" ]] && mkdir -p /tmp/zoxide-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/zoxide-install \
+        && _install_bin /tmp/zoxide-install zoxide "$DEST" \
+        && rm -rf /tmp/zoxide-install
+    fi
+    unset ZOXIDE_ARCH _url
   fi
 
   # --- delta ---
