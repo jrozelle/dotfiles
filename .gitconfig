@@ -5,8 +5,8 @@
 [core]
 	editor = vim
 	autocrlf = input
-	pager = sh -c 'command -v less >/dev/null 2>&1 && exec less -FRX || command -v more >/dev/null 2>&1 && exec more || exec cat'
-	excludesfile = /var/services/homes/julien/.gitignore_global
+	pager = delta
+	excludesfile = ~/.gitignore_global
 
 [init]
 	defaultBranch = main
@@ -29,6 +29,18 @@
 
 [diff]
 	colorMoved = default
+
+[include]
+	path = ~/.config/delta/catppuccin.gitconfig
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	features = catppuccin-mocha
+	navigate = true
+	side-by-side = true
+	line-numbers = true
 
 [alias]
 	st = status

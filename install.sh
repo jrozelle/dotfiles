@@ -4,16 +4,41 @@ set -euo pipefail
 # Detect platform
 IS_SYNOLOGY=false
 IS_MAC=false
+IS_LINUX=false
 if [[ -f /etc/synoinfo.conf ]]; then
   IS_SYNOLOGY=true
 elif [[ "$OSTYPE" == darwin* ]]; then
   IS_MAC=true
+elif [[ "$OSTYPE" == linux* ]]; then
+  IS_LINUX=true
 fi
 
-# Synology: check Entware/opkg
+# Architecture (shared by Synology and Linux blocks)
+ARCH=$(uname -m)
+
+# ====================
+# Helpers: GitHub binary downloads (used by Synology + Linux)
+# ====================
+# _gh_dl_url OWNER/REPO PATTERN → URL du release asset correspondant
+_gh_dl_url() {
+  curl -fsSL "https://api.github.com/repos/$1/releases/latest" \
+    | grep '"browser_download_url"' | grep "$2" | head -1 \
+    | sed 's/.*"browser_download_url": *"\([^"]*\)".*/\1/' || true
+}
+# _install_bin EXTRACT_DIR BINARY_NAME DEST_DIR → find + cp + chmod 755
+_install_bin() {
+  local _b
+  _b=$(find "$1" -name "$2" -type f | head -1)
+  if [[ -n "$_b" ]]; then
+    sudo cp -f "$_b" "$3/$2"
+    sudo chmod 755 "$3/$2"
+  fi
+}
+
+# ====================
+# Synology
+# ====================
 if $IS_SYNOLOGY; then
-  # Detect architecture
-  ARCH=$(uname -m)
   case "$ARCH" in
     x86_64)  ENTWARE_ARCH="x64-k3.2" ;;
     aarch64) ENTWARE_ARCH="aarch64-k3.10" ;;
@@ -80,12 +105,17 @@ if $IS_SYNOLOGY; then
   command -v nvim >/dev/null || { echo "Installing neovim..."; sudo "$ENTWARE_ROOT/bin/opkg" install neovim; }
   command -v eza >/dev/null  || { echo "Installing eza...";    sudo "$ENTWARE_ROOT/bin/opkg" install eza; }
   command -v fzf >/dev/null  || { echo "Installing fzf...";    sudo "$ENTWARE_ROOT/bin/opkg" install fzf; }
+  command -v htop >/dev/null || { echo "Installing htop...";   sudo "$ENTWARE_ROOT/bin/opkg" install htop; }
+  command -v tmux >/dev/null || { echo "Installing tmux...";   sudo "$ENTWARE_ROOT/bin/opkg" install tmux; }
+  command -v ncdu >/dev/null || { echo "Installing ncdu...";   sudo "$ENTWARE_ROOT/bin/opkg" install ncdu; }
+  # tldr n'est pas dans opkg — tealdeer (client Rust musl) installé plus bas
 
   # micro (not in opkg, install from GitHub)
   if ! command -v micro >/dev/null; then
     echo "Installing micro..."
     (cd /tmp && curl -fsSL https://getmic.ro | bash)
     sudo cp -f /tmp/micro "$ENTWARE_ROOT/bin/micro"
+    sudo chmod 755 "$ENTWARE_ROOT/bin/micro"
     rm -f /tmp/micro
   fi
 
@@ -101,7 +131,570 @@ if $IS_SYNOLOGY; then
     echo "Installing starship..."
     curl -fsSL https://starship.rs/install.sh | sudo sh -s -- -y -b "$ENTWARE_ROOT/bin"
   fi
+
+  # zoxide (smart cd — not in opkg, install from official script)
+  if ! command -v zoxide >/dev/null; then
+    echo "Installing zoxide..."
+    curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh \
+      | BIN_DIR="$ENTWARE_ROOT/bin" bash
+  fi
+
+  # delta (better git diff — GitHub releases, not in opkg)
+  if ! command -v delta >/dev/null; then
+    echo "Installing delta..."
+    DELTA_VER=$(curl -fsSL https://api.github.com/repos/dandavison/delta/releases/latest \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\(.*\)".*/\1/')
+    case "$ARCH" in
+      x86_64)  DELTA_ARCH="x86_64-unknown-linux-musl" ;;
+      aarch64) DELTA_ARCH="aarch64-unknown-linux-gnu" ;;
+      *)       DELTA_ARCH="" ;;
+    esac
+    if [[ -n "$DELTA_ARCH" && -n "$DELTA_VER" ]]; then
+      curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_ARCH}.tar.gz" \
+        | tar xz -C /tmp
+      sudo cp -f "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}/delta" "$ENTWARE_ROOT/bin/delta"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/delta"
+      rm -rf "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}"
+    fi
+  fi
+
+  # bat (syntax highlighting — GitHub releases, not in opkg)
+  if ! command -v bat >/dev/null; then
+    echo "Installing bat..."
+    BAT_VER=$(curl -fsSL https://api.github.com/repos/sharkdp/bat/releases/latest \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
+    case "$ARCH" in
+      x86_64)  BAT_ARCH="x86_64-unknown-linux-musl" ;;
+      aarch64) BAT_ARCH="aarch64-unknown-linux-musl" ;;
+      armv7l)  BAT_ARCH="arm-unknown-linux-musleabihf" ;;
+      *)       BAT_ARCH="" ;;
+    esac
+    if [[ -n "$BAT_ARCH" && -n "$BAT_VER" ]]; then
+      curl -fsSL "https://github.com/sharkdp/bat/releases/download/v${BAT_VER}/bat-v${BAT_VER}-${BAT_ARCH}.tar.gz" \
+        | tar xz -C /tmp
+      sudo cp -f "/tmp/bat-v${BAT_VER}-${BAT_ARCH}/bat" "$ENTWARE_ROOT/bin/bat"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/bat"
+      rm -rf "/tmp/bat-v${BAT_VER}-${BAT_ARCH}"
+    fi
+  fi
+
+  # gh (GitHub CLI — GitHub releases, not in opkg)
+  if ! command -v gh >/dev/null; then
+    echo "Installing gh (GitHub CLI)..."
+    GH_VER=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
+    case "$ARCH" in
+      x86_64)  GH_ARCH="linux_amd64" ;;
+      aarch64) GH_ARCH="linux_arm64" ;;
+      armv7l)  GH_ARCH="linux_armv6" ;;
+      *)       GH_ARCH="" ;;
+    esac
+    if [[ -n "$GH_ARCH" && -n "$GH_VER" ]]; then
+      curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VER}/gh_${GH_VER}_${GH_ARCH}.tar.gz" \
+        | tar xz -C /tmp
+      sudo cp -f "/tmp/gh_${GH_VER}_${GH_ARCH}/bin/gh" "$ENTWARE_ROOT/bin/gh"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/gh"
+      rm -rf "/tmp/gh_${GH_VER}_${GH_ARCH}"
+    fi
+  fi
+
+  # yq (YAML processor — single static binary)
+  if ! command -v yq >/dev/null; then
+    echo "Installing yq..."
+    case "$ARCH" in
+      x86_64)  YQ_ARCH="linux_amd64" ;;
+      aarch64) YQ_ARCH="linux_arm64" ;;
+      armv7l)  YQ_ARCH="linux_arm" ;;
+      *)       YQ_ARCH="" ;;
+    esac
+    if [[ -n "$YQ_ARCH" ]]; then
+      sudo curl -fsSL "https://github.com/mikefarah/yq/releases/latest/download/yq_${YQ_ARCH}" \
+        -o "$ENTWARE_ROOT/bin/yq"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/yq"
+    fi
+  fi
+
+  # tldr via tealdeer (client Rust musl — opkg ne l'a pas)
+  if ! tldr --version >/dev/null 2>&1; then
+    echo "Installing tealdeer (tldr)..."
+    case "$ARCH" in
+      x86_64)  TLDR_ARCH="x86_64-musl" ;;
+      aarch64) TLDR_ARCH="aarch64-musl" ;;
+      armv7l)  TLDR_ARCH="arm-musleabihf" ;;
+      *)       TLDR_ARCH="" ;;
+    esac
+    if [[ -n "$TLDR_ARCH" ]]; then
+      sudo curl -fsSL "https://github.com/dbrgn/tealdeer/releases/latest/download/tealdeer-linux-${TLDR_ARCH}" \
+        -o "$ENTWARE_ROOT/bin/tldr"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/tldr"
+      tldr --update >/dev/null 2>&1 || true
+    fi
+  fi
+
+  # duf (df moderne)
+  if ! duf --version >/dev/null 2>&1; then
+    echo "Installing duf..."
+    case "$ARCH" in
+      x86_64)  _pat="linux_amd64.tar.gz" ;;
+      aarch64) _pat="linux_arm64.tar.gz" ;;
+      armv7l)  _pat="linux_armv7.tar.gz" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url muesli/duf "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/duf-install
+        curl -fsSL "$_url" | tar xz -C /tmp/duf-install
+        _install_bin /tmp/duf-install duf "$ENTWARE_ROOT/bin"
+        rm -rf /tmp/duf-install
+      fi
+    fi
+  fi
+
+  # glow (markdown viewer)
+  if ! glow --version >/dev/null 2>&1; then
+    echo "Installing glow..."
+    case "$ARCH" in
+      x86_64)  _pat="Linux_x86_64.tar.gz" ;;
+      aarch64) _pat="Linux_arm64.tar.gz"  ;;
+      armv7l)  _pat="Linux_armv7.tar.gz"  ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url charmbracelet/glow "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/glow-install
+        curl -fsSL "$_url" | tar xz -C /tmp/glow-install
+        _install_bin /tmp/glow-install glow "$ENTWARE_ROOT/bin"
+        rm -rf /tmp/glow-install
+      fi
+    fi
+  fi
+
+  # sd (sed moderne — musl static)
+  if ! sd --version >/dev/null 2>&1; then
+    echo "Installing sd..."
+    case "$ARCH" in
+      x86_64)  _pat="x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="aarch64-unknown-linux-musl.tar.gz" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url chmln/sd "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/sd-install
+        curl -fsSL "$_url" | tar xz -C /tmp/sd-install
+        _install_bin /tmp/sd-install sd "$ENTWARE_ROOT/bin"
+        rm -rf /tmp/sd-install
+      fi
+    fi
+  fi
+
+  # procs (ps moderne — zip)
+  if ! procs --version >/dev/null 2>&1; then
+    echo "Installing procs..."
+    case "$ARCH" in
+      x86_64)  _pat="x86_64-linux.zip" ;;
+      aarch64) _pat="aarch64-linux.zip" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url dalance/procs "$_pat")
+      if [[ -n "$_url" ]]; then
+        curl -fsSL "$_url" -o /tmp/procs.zip
+        unzip -q -o /tmp/procs.zip procs -d /tmp
+        sudo cp -f /tmp/procs "$ENTWARE_ROOT/bin/procs"
+        sudo chmod 755 "$ENTWARE_ROOT/bin/procs"
+        rm -f /tmp/procs.zip /tmp/procs
+      fi
+    fi
+  fi
+
+  unset _pat _url _b
+
+  # Ensure all manually-installed binaries are executable (idempotent — fixes
+  # previous runs where cp was done without chmod, or where chmod was skipped)
+  for _bin in bat delta gh tldr duf glow sd procs; do
+    [[ -f "$ENTWARE_ROOT/bin/$_bin" ]] && sudo chmod 755 "$ENTWARE_ROOT/bin/$_bin"
+  done
+  unset _bin
 fi
+
+# ====================
+# Linux classique (non-Synology)
+# ====================
+if $IS_LINUX; then
+  DEST="/usr/local/bin"
+
+  # --- Package manager: core deps ---
+  # On n'installe que les outils sans binaire statique portable (git, zsh, tmux…)
+  # Tout le reste vient de GitHub releases comme sur Synology.
+  if command -v apt-get >/dev/null; then
+    echo "==> Installing core packages (apt)"
+    sudo apt-get update -qq
+    sudo apt-get install -y git zsh curl wget unzip tmux htop ncdu jq
+  elif command -v dnf >/dev/null; then
+    echo "==> Installing core packages (dnf)"
+    sudo dnf install -y git zsh curl wget unzip tmux htop ncdu jq
+  elif command -v pacman >/dev/null; then
+    echo "==> Installing core packages (pacman)"
+    sudo pacman -S --noconfirm git zsh curl wget unzip tmux htop ncdu jq
+  elif command -v zypper >/dev/null; then
+    echo "==> Installing core packages (zypper)"
+    sudo zypper install -n git zsh curl wget unzip tmux htop ncdu jq
+  else
+    echo "WARN: Package manager not detected. Ensure git, zsh, curl, tmux, htop are installed."
+  fi
+
+  # --- neovim (GitHub releases — évite les versions obsolètes des dépôts) ---
+  if ! command -v nvim >/dev/null; then
+    echo "Installing neovim..."
+    case "$ARCH" in
+      x86_64)  NVIM_ARCH="linux-x86_64" ;;
+      aarch64) NVIM_ARCH="linux-arm64" ;;
+      *)       NVIM_ARCH="" ;;
+    esac
+    if [[ -n "$NVIM_ARCH" ]]; then
+      NVIM_VER=$(curl -fsSL https://api.github.com/repos/neovim/neovim/releases/latest \
+        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\(.*\)".*/\1/')
+      curl -fsSL "https://github.com/neovim/neovim/releases/download/${NVIM_VER}/nvim-${NVIM_ARCH}.tar.gz" \
+        | sudo tar xz -C /opt
+      sudo ln -sf "/opt/nvim-${NVIM_ARCH}/bin/nvim" "$DEST/nvim"
+    fi
+    unset NVIM_ARCH NVIM_VER
+  fi
+
+  # --- fzf ---
+  if ! command -v fzf >/dev/null; then
+    echo "Installing fzf..."
+    case "$ARCH" in
+      x86_64)  FZF_ARCH="linux_amd64" ;;
+      aarch64) FZF_ARCH="linux_arm64" ;;
+      armv7l)  FZF_ARCH="linux_armv7" ;;
+      *)       FZF_ARCH="" ;;
+    esac
+    if [[ -n "$FZF_ARCH" ]]; then
+      FZF_VER=$(curl -fsSL https://api.github.com/repos/junegunn/fzf/releases/latest \
+        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
+      mkdir -p /tmp/fzf-install
+      curl -fsSL "https://github.com/junegunn/fzf/releases/download/v${FZF_VER}/fzf-${FZF_VER}-${FZF_ARCH}.tar.gz" \
+        | tar xz -C /tmp/fzf-install
+      sudo cp -f /tmp/fzf-install/fzf "$DEST/fzf"
+      sudo chmod 755 "$DEST/fzf"
+      rm -rf /tmp/fzf-install
+    fi
+    unset FZF_ARCH FZF_VER
+  fi
+  # fzf shell integration
+  FZF_SHARE="/usr/local/share/fzf"
+  if [[ ! -f "$FZF_SHARE/key-bindings.zsh" ]]; then
+    echo "Installing fzf shell integration..."
+    sudo mkdir -p "$FZF_SHARE"
+    sudo curl -fsSL https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.zsh \
+      -o "$FZF_SHARE/key-bindings.zsh"
+  fi
+  unset FZF_SHARE
+
+  # --- eza ---
+  if ! command -v eza >/dev/null; then
+    echo "Installing eza..."
+    case "$ARCH" in
+      x86_64)  _pat="eza_x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="eza_aarch64-unknown-linux-musl.tar.gz" ;;
+      armv7l)  _pat="eza_armv7-unknown-linux-musleabihf.tar.gz" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url eza-community/eza "$_pat")
+      [[ -n "$_url" ]] && mkdir -p /tmp/eza-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/eza-install \
+        && _install_bin /tmp/eza-install eza "$DEST" \
+        && rm -rf /tmp/eza-install
+    fi
+    unset _pat _url
+  fi
+
+  # --- micro ---
+  if ! command -v micro >/dev/null; then
+    echo "Installing micro..."
+    (cd /tmp && curl -fsSL https://getmic.ro | bash)
+    sudo cp -f /tmp/micro "$DEST/micro"
+    sudo chmod 755 "$DEST/micro"
+    rm -f /tmp/micro
+  fi
+
+  # --- starship ---
+  if ! command -v starship >/dev/null; then
+    echo "Installing starship..."
+    curl -fsSL https://starship.rs/install.sh | sudo sh -s -- -y -b "$DEST"
+  fi
+
+  # --- zoxide ---
+  if ! command -v zoxide >/dev/null; then
+    echo "Installing zoxide..."
+    curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh \
+      | BIN_DIR="$DEST" bash
+  fi
+
+  # --- delta ---
+  if ! command -v delta >/dev/null; then
+    echo "Installing delta..."
+    case "$ARCH" in
+      x86_64)  DELTA_ARCH="x86_64-unknown-linux-musl" ;;
+      aarch64) DELTA_ARCH="aarch64-unknown-linux-gnu" ;;
+      *)       DELTA_ARCH="" ;;
+    esac
+    if [[ -n "$DELTA_ARCH" ]]; then
+      DELTA_VER=$(curl -fsSL https://api.github.com/repos/dandavison/delta/releases/latest \
+        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\(.*\)".*/\1/')
+      if [[ -n "$DELTA_VER" ]]; then
+        curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_ARCH}.tar.gz" \
+          | tar xz -C /tmp
+        sudo cp -f "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}/delta" "$DEST/delta"
+        sudo chmod 755 "$DEST/delta"
+        rm -rf "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}"
+      fi
+    fi
+    unset DELTA_ARCH DELTA_VER
+  fi
+
+  # --- bat ---
+  if ! command -v bat >/dev/null; then
+    echo "Installing bat..."
+    case "$ARCH" in
+      x86_64)  BAT_ARCH="x86_64-unknown-linux-musl" ;;
+      aarch64) BAT_ARCH="aarch64-unknown-linux-musl" ;;
+      armv7l)  BAT_ARCH="arm-unknown-linux-musleabihf" ;;
+      *)       BAT_ARCH="" ;;
+    esac
+    if [[ -n "$BAT_ARCH" ]]; then
+      BAT_VER=$(curl -fsSL https://api.github.com/repos/sharkdp/bat/releases/latest \
+        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
+      if [[ -n "$BAT_VER" ]]; then
+        curl -fsSL "https://github.com/sharkdp/bat/releases/download/v${BAT_VER}/bat-v${BAT_VER}-${BAT_ARCH}.tar.gz" \
+          | tar xz -C /tmp
+        sudo cp -f "/tmp/bat-v${BAT_VER}-${BAT_ARCH}/bat" "$DEST/bat"
+        sudo chmod 755 "$DEST/bat"
+        rm -rf "/tmp/bat-v${BAT_VER}-${BAT_ARCH}"
+      fi
+    fi
+    unset BAT_ARCH BAT_VER
+  fi
+
+  # --- ripgrep (rg — requis pour nvim telescope) ---
+  if ! command -v rg >/dev/null; then
+    echo "Installing ripgrep..."
+    case "$ARCH" in
+      x86_64)  _pat="x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="aarch64-unknown-linux-gnu.tar.gz" ;;
+      armv7l)  _pat="armv7-unknown-linux-musleabihf.tar.gz" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url BurntSushi/ripgrep "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/rg-install
+        curl -fsSL "$_url" | tar xz -C /tmp/rg-install
+        _install_bin /tmp/rg-install rg "$DEST"
+        rm -rf /tmp/rg-install
+      fi
+    fi
+    unset _pat _url
+  fi
+
+  # --- fd (find moderne) ---
+  if ! command -v fd >/dev/null; then
+    echo "Installing fd..."
+    case "$ARCH" in
+      x86_64)  _pat="x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="aarch64-unknown-linux-musl.tar.gz" ;;
+      armv7l)  _pat="arm-unknown-linux-musleabihf.tar.gz" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url sharkdp/fd "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/fd-install
+        curl -fsSL "$_url" | tar xz -C /tmp/fd-install
+        _install_bin /tmp/fd-install fd "$DEST"
+        rm -rf /tmp/fd-install
+      fi
+    fi
+    unset _pat _url
+  fi
+
+  # --- gh (GitHub CLI) ---
+  if ! command -v gh >/dev/null; then
+    echo "Installing gh (GitHub CLI)..."
+    case "$ARCH" in
+      x86_64)  GH_ARCH="linux_amd64" ;;
+      aarch64) GH_ARCH="linux_arm64" ;;
+      armv7l)  GH_ARCH="linux_armv6" ;;
+      *)       GH_ARCH="" ;;
+    esac
+    if [[ -n "$GH_ARCH" ]]; then
+      GH_VER=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest \
+        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
+      if [[ -n "$GH_VER" ]]; then
+        curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VER}/gh_${GH_VER}_${GH_ARCH}.tar.gz" \
+          | tar xz -C /tmp
+        sudo cp -f "/tmp/gh_${GH_VER}_${GH_ARCH}/bin/gh" "$DEST/gh"
+        sudo chmod 755 "$DEST/gh"
+        rm -rf "/tmp/gh_${GH_VER}_${GH_ARCH}"
+      fi
+    fi
+    unset GH_ARCH GH_VER
+  fi
+
+  # --- yq ---
+  if ! command -v yq >/dev/null; then
+    echo "Installing yq..."
+    case "$ARCH" in
+      x86_64)  YQ_ARCH="linux_amd64" ;;
+      aarch64) YQ_ARCH="linux_arm64" ;;
+      armv7l)  YQ_ARCH="linux_arm" ;;
+      *)       YQ_ARCH="" ;;
+    esac
+    if [[ -n "$YQ_ARCH" ]]; then
+      sudo curl -fsSL "https://github.com/mikefarah/yq/releases/latest/download/yq_${YQ_ARCH}" \
+        -o "$DEST/yq"
+      sudo chmod 755 "$DEST/yq"
+    fi
+    unset YQ_ARCH
+  fi
+
+  # --- tealdeer (tldr) ---
+  if ! tldr --version >/dev/null 2>&1; then
+    echo "Installing tealdeer (tldr)..."
+    case "$ARCH" in
+      x86_64)  TLDR_ARCH="x86_64-musl" ;;
+      aarch64) TLDR_ARCH="aarch64-musl" ;;
+      armv7l)  TLDR_ARCH="arm-musleabihf" ;;
+      *)       TLDR_ARCH="" ;;
+    esac
+    if [[ -n "$TLDR_ARCH" ]]; then
+      sudo curl -fsSL "https://github.com/dbrgn/tealdeer/releases/latest/download/tealdeer-linux-${TLDR_ARCH}" \
+        -o "$DEST/tldr"
+      sudo chmod 755 "$DEST/tldr"
+      tldr --update >/dev/null 2>&1 || true
+    fi
+    unset TLDR_ARCH
+  fi
+
+  # --- duf ---
+  if ! duf --version >/dev/null 2>&1; then
+    echo "Installing duf..."
+    case "$ARCH" in
+      x86_64)  _pat="linux_amd64.tar.gz" ;;
+      aarch64) _pat="linux_arm64.tar.gz" ;;
+      armv7l)  _pat="linux_armv7.tar.gz" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url muesli/duf "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/duf-install
+        curl -fsSL "$_url" | tar xz -C /tmp/duf-install
+        _install_bin /tmp/duf-install duf "$DEST"
+        rm -rf /tmp/duf-install
+      fi
+    fi
+    unset _pat _url
+  fi
+
+  # --- glow ---
+  if ! glow --version >/dev/null 2>&1; then
+    echo "Installing glow..."
+    case "$ARCH" in
+      x86_64)  _pat="Linux_x86_64.tar.gz" ;;
+      aarch64) _pat="Linux_arm64.tar.gz"  ;;
+      armv7l)  _pat="Linux_armv7.tar.gz"  ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url charmbracelet/glow "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/glow-install
+        curl -fsSL "$_url" | tar xz -C /tmp/glow-install
+        _install_bin /tmp/glow-install glow "$DEST"
+        rm -rf /tmp/glow-install
+      fi
+    fi
+    unset _pat _url
+  fi
+
+  # --- sd ---
+  if ! sd --version >/dev/null 2>&1; then
+    echo "Installing sd..."
+    case "$ARCH" in
+      x86_64)  _pat="x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="aarch64-unknown-linux-musl.tar.gz" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url chmln/sd "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/sd-install
+        curl -fsSL "$_url" | tar xz -C /tmp/sd-install
+        _install_bin /tmp/sd-install sd "$DEST"
+        rm -rf /tmp/sd-install
+      fi
+    fi
+    unset _pat _url
+  fi
+
+  # --- procs ---
+  if ! procs --version >/dev/null 2>&1; then
+    echo "Installing procs..."
+    case "$ARCH" in
+      x86_64)  _pat="x86_64-linux.zip" ;;
+      aarch64) _pat="aarch64-linux.zip" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url dalance/procs "$_pat")
+      if [[ -n "$_url" ]]; then
+        curl -fsSL "$_url" -o /tmp/procs.zip
+        unzip -q -o /tmp/procs.zip procs -d /tmp
+        sudo cp -f /tmp/procs "$DEST/procs"
+        sudo chmod 755 "$DEST/procs"
+        rm -f /tmp/procs.zip /tmp/procs
+      fi
+    fi
+    unset _pat _url
+  fi
+
+  # --- lazygit ---
+  if ! command -v lazygit >/dev/null; then
+    echo "Installing lazygit..."
+    case "$ARCH" in
+      x86_64)  _pat="Linux_x86_64.tar.gz" ;;
+      aarch64) _pat="Linux_arm64.tar.gz" ;;
+      armv7l)  _pat="Linux_armv7.tar.gz" ;;
+      *)       _pat="" ;;
+    esac
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url jesseduffield/lazygit "$_pat")
+      if [[ -n "$_url" ]]; then
+        mkdir -p /tmp/lazygit-install
+        curl -fsSL "$_url" | tar xz -C /tmp/lazygit-install
+        _install_bin /tmp/lazygit-install lazygit "$DEST"
+        rm -rf /tmp/lazygit-install
+      fi
+    fi
+    unset _pat _url
+  fi
+
+  # Ensure all manually-installed binaries are executable
+  for _bin in bat delta gh tldr duf glow sd procs lazygit rg fd; do
+    [[ -f "$DEST/$_bin" ]] && sudo chmod 755 "$DEST/$_bin"
+  done
+  unset _bin DEST
+fi
+
+# Unset shared helpers
+unset -f _gh_dl_url _install_bin
+unset ARCH
 
 # macOS: install Homebrew if missing
 if $IS_MAC && ! command -v brew >/dev/null; then
@@ -117,6 +710,13 @@ HOME_FILES=(
   .zprofile
   .zshrc
   .gitconfig
+  .gitignore_global
+  .tmux.conf
+)
+
+# Directories to symlink to $HOME
+HOME_DIRS=(
+  .zshrc.d
 )
 
 # Files to symlink to $HOME/.config
@@ -157,6 +757,11 @@ for file in "${HOME_FILES[@]}"; do
   [[ -f "$DOTFILES/$file" ]] && link_file "$DOTFILES/$file" "$HOME/$file"
 done
 
+# Home directory symlinks (directories)
+for dir in "${HOME_DIRS[@]}"; do
+  [[ -d "$DOTFILES/$dir" ]] && link_file "$DOTFILES/$dir" "$HOME/$dir"
+done
+
 # Config directory files
 mkdir -p "$HOME/.config"
 for file in "${CONFIG_FILES[@]}"; do
@@ -189,6 +794,31 @@ if $IS_MAC && command -v brew >/dev/null; then
     echo "==> Installing packages from Brewfile"
     brew bundle --file="$DOTFILES/Brewfile"
   fi
+fi
+
+# --------------------
+# Themes: Catppuccin Mocha
+# --------------------
+
+# bat — thème Catppuccin Mocha (aussi utilisé par delta via syntect)
+if bat --version >/dev/null 2>&1; then
+  BAT_THEMES_DIR="$(bat --config-dir)/themes"
+  if [[ ! -f "$BAT_THEMES_DIR/Catppuccin Mocha.tmTheme" ]]; then
+    echo "==> Installing Catppuccin Mocha theme for bat"
+    mkdir -p "$BAT_THEMES_DIR"
+    curl -fsSL "https://raw.githubusercontent.com/catppuccin/bat/main/themes/Catppuccin%20Mocha.tmTheme" \
+      -o "$BAT_THEMES_DIR/Catppuccin Mocha.tmTheme"
+    bat cache --build
+  fi
+fi
+
+# delta — couleurs Catppuccin Mocha (téléchargé depuis catppuccin/delta)
+DELTA_CONF_DIR="$HOME/.config/delta"
+if [[ ! -f "$DELTA_CONF_DIR/catppuccin.gitconfig" ]]; then
+  echo "==> Installing Catppuccin theme for delta"
+  mkdir -p "$DELTA_CONF_DIR"
+  curl -fsSL "https://raw.githubusercontent.com/catppuccin/delta/main/catppuccin.gitconfig" \
+    -o "$DELTA_CONF_DIR/catppuccin.gitconfig"
 fi
 
 # Bootstrap zsh plugins (antidote)
