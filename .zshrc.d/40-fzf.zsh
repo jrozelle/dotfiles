@@ -12,6 +12,9 @@ if _has fzf; then
     source /opt/share/fzf/key-bindings.zsh
   elif [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
     source /usr/share/fzf/key-bindings.zsh
+  elif [[ -f /usr/local/share/fzf/key-bindings.zsh ]]; then
+    # Linux: install.sh installs here
+    source /usr/local/share/fzf/key-bindings.zsh
   elif [[ -f ~/.fzf.zsh ]]; then
     source ~/.fzf.zsh
   fi
@@ -25,7 +28,7 @@ if _has fzf; then
 
   # Options par défaut — Catppuccin Mocha
   export FZF_DEFAULT_OPTS="
-    --height 40% --layout=reverse --border --inline-info
+    --height 40% --layout=reverse --border --info=inline
     --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8
     --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc
     --color=marker:#b4befe,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
