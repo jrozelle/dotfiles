@@ -86,6 +86,7 @@ if $IS_SYNOLOGY; then
     echo "Installing micro..."
     (cd /tmp && curl -fsSL https://getmic.ro | bash)
     sudo cp -f /tmp/micro "$ENTWARE_ROOT/bin/micro"
+    sudo chmod 755 "$ENTWARE_ROOT/bin/micro"
     rm -f /tmp/micro
   fi
 
@@ -123,7 +124,7 @@ if $IS_SYNOLOGY; then
       curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_ARCH}.tar.gz" \
         | tar xz -C /tmp
       sudo cp -f "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}/delta" "$ENTWARE_ROOT/bin/delta"
-      sudo chmod +x "$ENTWARE_ROOT/bin/delta"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/delta"
       rm -rf "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}"
     fi
   fi
@@ -143,7 +144,7 @@ if $IS_SYNOLOGY; then
       curl -fsSL "https://github.com/sharkdp/bat/releases/download/v${BAT_VER}/bat-v${BAT_VER}-${BAT_ARCH}.tar.gz" \
         | tar xz -C /tmp
       sudo cp -f "/tmp/bat-v${BAT_VER}-${BAT_ARCH}/bat" "$ENTWARE_ROOT/bin/bat"
-      sudo chmod +x "$ENTWARE_ROOT/bin/bat"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/bat"
       rm -rf "/tmp/bat-v${BAT_VER}-${BAT_ARCH}"
     fi
   fi
@@ -163,7 +164,7 @@ if $IS_SYNOLOGY; then
       curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VER}/gh_${GH_VER}_${GH_ARCH}.tar.gz" \
         | tar xz -C /tmp
       sudo cp -f "/tmp/gh_${GH_VER}_${GH_ARCH}/bin/gh" "$ENTWARE_ROOT/bin/gh"
-      sudo chmod +x "$ENTWARE_ROOT/bin/gh"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/gh"
       rm -rf "/tmp/gh_${GH_VER}_${GH_ARCH}"
     fi
   fi
@@ -180,14 +181,14 @@ if $IS_SYNOLOGY; then
     if [[ -n "$YQ_ARCH" ]]; then
       sudo curl -fsSL "https://github.com/mikefarah/yq/releases/latest/download/yq_${YQ_ARCH}" \
         -o "$ENTWARE_ROOT/bin/yq"
-      sudo chmod +x "$ENTWARE_ROOT/bin/yq"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/yq"
     fi
   fi
 
   # Ensure all manually-installed binaries are executable (idempotent — fixes
   # previous runs where cp was done without chmod, or where chmod was skipped)
   for _bin in bat delta gh; do
-    [[ -f "$ENTWARE_ROOT/bin/$_bin" ]] && sudo chmod +x "$ENTWARE_ROOT/bin/$_bin"
+    [[ -f "$ENTWARE_ROOT/bin/$_bin" ]] && sudo chmod 755 "$ENTWARE_ROOT/bin/$_bin"
   done
   unset _bin
 fi
