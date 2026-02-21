@@ -127,6 +127,26 @@ if $IS_SYNOLOGY; then
     fi
   fi
 
+  # bat (syntax highlighting — GitHub releases, not in opkg)
+  if ! command -v bat >/dev/null; then
+    echo "Installing bat..."
+    BAT_VER=$(curl -fsSL https://api.github.com/repos/sharkdp/bat/releases/latest \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
+    case "$ARCH" in
+      x86_64)  BAT_ARCH="x86_64-unknown-linux-musl" ;;
+      aarch64) BAT_ARCH="aarch64-unknown-linux-musl" ;;
+      armv7l)  BAT_ARCH="arm-unknown-linux-musleabihf" ;;
+      *)       BAT_ARCH="" ;;
+    esac
+    if [[ -n "$BAT_ARCH" && -n "$BAT_VER" ]]; then
+      curl -fsSL "https://github.com/sharkdp/bat/releases/download/v${BAT_VER}/bat-v${BAT_VER}-${BAT_ARCH}.tar.gz" \
+        | tar xz -C /tmp
+      sudo cp -f "/tmp/bat-v${BAT_VER}-${BAT_ARCH}/bat" "$ENTWARE_ROOT/bin/bat"
+      sudo chmod +x "$ENTWARE_ROOT/bin/bat"
+      rm -rf "/tmp/bat-v${BAT_VER}-${BAT_ARCH}"
+    fi
+  fi
+
   # gh (GitHub CLI — GitHub releases, not in opkg)
   if ! command -v gh >/dev/null; then
     echo "Installing gh (GitHub CLI)..."
@@ -142,6 +162,7 @@ if $IS_SYNOLOGY; then
       curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VER}/gh_${GH_VER}_${GH_ARCH}.tar.gz" \
         | tar xz -C /tmp
       sudo cp -f "/tmp/gh_${GH_VER}_${GH_ARCH}/bin/gh" "$ENTWARE_ROOT/bin/gh"
+      sudo chmod +x "$ENTWARE_ROOT/bin/gh"
       rm -rf "/tmp/gh_${GH_VER}_${GH_ARCH}"
     fi
   fi
