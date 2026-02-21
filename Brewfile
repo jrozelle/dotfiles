@@ -13,6 +13,7 @@ brew "fzf"       # fuzzy finder
 brew "zoxide"    # smart cd
 
 # System monitoring
+brew "htop"
 brew "btop"      # htop++
 brew "asitop"    # Apple Silicon monitor
 
