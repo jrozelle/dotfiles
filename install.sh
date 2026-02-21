@@ -123,6 +123,7 @@ if $IS_SYNOLOGY; then
       curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_ARCH}.tar.gz" \
         | tar xz -C /tmp
       sudo cp -f "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}/delta" "$ENTWARE_ROOT/bin/delta"
+      sudo chmod +x "$ENTWARE_ROOT/bin/delta"
       rm -rf "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}"
     fi
   fi
@@ -182,6 +183,13 @@ if $IS_SYNOLOGY; then
       sudo chmod +x "$ENTWARE_ROOT/bin/yq"
     fi
   fi
+
+  # Ensure all manually-installed binaries are executable (idempotent — fixes
+  # previous runs where cp was done without chmod, or where chmod was skipped)
+  for _bin in bat delta gh; do
+    [[ -f "$ENTWARE_ROOT/bin/$_bin" ]] && sudo chmod +x "$ENTWARE_ROOT/bin/$_bin"
+  done
+  unset _bin
 fi
 
 # macOS: install Homebrew if missing
@@ -288,7 +296,7 @@ fi
 # --------------------
 
 # bat — thème Catppuccin Mocha (aussi utilisé par delta via syntect)
-if command -v bat >/dev/null; then
+if bat --version >/dev/null 2>&1; then
   BAT_THEMES_DIR="$(bat --config-dir)/themes"
   if [[ ! -f "$BAT_THEMES_DIR/Catppuccin Mocha.tmTheme" ]]; then
     echo "==> Installing Catppuccin Mocha theme for bat"
