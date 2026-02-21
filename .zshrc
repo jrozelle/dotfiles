@@ -66,10 +66,11 @@ fi
 [[ -d ~/.zsh/completions ]] && fpath=(~/.zsh/completions $fpath)
 autoload -Uz compinit
 # Régénère le cache toutes les 24h, sinon utilise le cache existant
+# -u : ignore les répertoires "insecures" (Entware/Synology = group-writable par design)
 if [[ -n ${ZDOTDIR:-$HOME}/.zcompdump(#qN.mh+24) ]]; then
-  compinit
+  compinit -u
 else
-  compinit -C
+  compinit -uC
 fi
 
 # --------------------
