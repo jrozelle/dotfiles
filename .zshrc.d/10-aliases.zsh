@@ -58,6 +58,9 @@ fi
 if _has bat; then
   alias cat='bat --paging=never'
   alias less='bat'
+  export BAT_THEME="Monokai Extended"
+  export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+  export MANROFFOPT="-c"
 fi
 
 # ====================
@@ -118,6 +121,14 @@ fi
 # ====================
 if _has lazygit; then
   alias lzg='lazygit'
+fi
+
+if _has gh; then
+  # Completions (générées une seule fois)
+  if [[ ! -f ~/.zsh/completions/_gh ]]; then
+    mkdir -p ~/.zsh/completions
+    gh completion -s zsh > ~/.zsh/completions/_gh
+  fi
 fi
 
 if _has docker; then

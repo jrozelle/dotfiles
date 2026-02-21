@@ -108,6 +108,59 @@ if $IS_SYNOLOGY; then
     curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh \
       | BIN_DIR="$ENTWARE_ROOT/bin" bash
   fi
+
+  # delta (better git diff — GitHub releases, not in opkg)
+  if ! command -v delta >/dev/null; then
+    echo "Installing delta..."
+    DELTA_VER=$(curl -fsSL https://api.github.com/repos/dandavison/delta/releases/latest \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\(.*\)".*/\1/')
+    case "$ARCH" in
+      x86_64)  DELTA_ARCH="x86_64-unknown-linux-musl" ;;
+      aarch64) DELTA_ARCH="aarch64-unknown-linux-gnu" ;;
+      *)       DELTA_ARCH="" ;;
+    esac
+    if [[ -n "$DELTA_ARCH" && -n "$DELTA_VER" ]]; then
+      curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_ARCH}.tar.gz" \
+        | tar xz -C /tmp
+      sudo cp -f "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}/delta" "$ENTWARE_ROOT/bin/delta"
+      rm -rf "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}"
+    fi
+  fi
+
+  # gh (GitHub CLI — GitHub releases, not in opkg)
+  if ! command -v gh >/dev/null; then
+    echo "Installing gh (GitHub CLI)..."
+    GH_VER=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
+    case "$ARCH" in
+      x86_64)  GH_ARCH="linux_amd64" ;;
+      aarch64) GH_ARCH="linux_arm64" ;;
+      armv7l)  GH_ARCH="linux_armv6" ;;
+      *)       GH_ARCH="" ;;
+    esac
+    if [[ -n "$GH_ARCH" && -n "$GH_VER" ]]; then
+      curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VER}/gh_${GH_VER}_${GH_ARCH}.tar.gz" \
+        | tar xz -C /tmp
+      sudo cp -f "/tmp/gh_${GH_VER}_${GH_ARCH}/bin/gh" "$ENTWARE_ROOT/bin/gh"
+      rm -rf "/tmp/gh_${GH_VER}_${GH_ARCH}"
+    fi
+  fi
+
+  # yq (YAML processor — single static binary)
+  if ! command -v yq >/dev/null; then
+    echo "Installing yq..."
+    case "$ARCH" in
+      x86_64)  YQ_ARCH="linux_amd64" ;;
+      aarch64) YQ_ARCH="linux_arm64" ;;
+      armv7l)  YQ_ARCH="linux_arm" ;;
+      *)       YQ_ARCH="" ;;
+    esac
+    if [[ -n "$YQ_ARCH" ]]; then
+      sudo curl -fsSL "https://github.com/mikefarah/yq/releases/latest/download/yq_${YQ_ARCH}" \
+        -o "$ENTWARE_ROOT/bin/yq"
+      sudo chmod +x "$ENTWARE_ROOT/bin/yq"
+    fi
+  fi
 fi
 
 # macOS: install Homebrew if missing
@@ -124,6 +177,7 @@ HOME_FILES=(
   .zprofile
   .zshrc
   .gitconfig
+  .gitignore_global
 )
 
 # Directories to symlink to $HOME

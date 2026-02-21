@@ -92,3 +92,8 @@ for _f in "${ZDOTDIR:-$HOME}"/.zshrc.d/*.zsh(N); do
   source "$_f"
 done
 unset _f _os
+
+# --------------------
+# Overrides locaux (non versionnés — tokens, chemins machine-spécifiques)
+# --------------------
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

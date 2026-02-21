@@ -17,6 +17,8 @@ brew "btop"      # htop++
 brew "asitop"    # Apple Silicon monitor
 
 # Git
+brew "git-delta"  # better diff pager
+brew "gh"         # GitHub CLI
 brew "lazygit"
 
 # Network
@@ -30,6 +32,7 @@ brew "neovim"    # vim on steroids
 
 # Utils
 brew "jq"        # JSON
+brew "yq"        # YAML
 brew "tree"
 brew "ripgrep"   # needed for nvim telescope
 
