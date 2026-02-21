@@ -10,6 +10,7 @@ brew "eza"       # ls
 brew "bat"       # cat
 brew "fd"        # find
 brew "fzf"       # fuzzy finder
+brew "zoxide"    # smart cd
 
 # System monitoring
 brew "btop"      # htop++

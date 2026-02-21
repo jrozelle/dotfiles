@@ -101,6 +101,13 @@ if $IS_SYNOLOGY; then
     echo "Installing starship..."
     curl -fsSL https://starship.rs/install.sh | sudo sh -s -- -y -b "$ENTWARE_ROOT/bin"
   fi
+
+  # zoxide (smart cd — not in opkg, install from official script)
+  if ! command -v zoxide >/dev/null; then
+    echo "Installing zoxide..."
+    curl -fsSL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh \
+      | BIN_DIR="$ENTWARE_ROOT/bin" bash
+  fi
 fi
 
 # macOS: install Homebrew if missing
@@ -117,6 +124,11 @@ HOME_FILES=(
   .zprofile
   .zshrc
   .gitconfig
+)
+
+# Directories to symlink to $HOME
+HOME_DIRS=(
+  .zshrc.d
 )
 
 # Files to symlink to $HOME/.config
@@ -155,6 +167,11 @@ echo "==> Installing dotfiles from $DOTFILES"
 # Home directory files
 for file in "${HOME_FILES[@]}"; do
   [[ -f "$DOTFILES/$file" ]] && link_file "$DOTFILES/$file" "$HOME/$file"
+done
+
+# Home directory symlinks (directories)
+for dir in "${HOME_DIRS[@]}"; do
+  [[ -d "$DOTFILES/$dir" ]] && link_file "$DOTFILES/$dir" "$HOME/$dir"
 done
 
 # Config directory files
