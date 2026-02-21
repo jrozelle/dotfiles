@@ -107,7 +107,8 @@ if $IS_SYNOLOGY; then
   command -v fzf >/dev/null  || { echo "Installing fzf...";    sudo "$ENTWARE_ROOT/bin/opkg" install fzf; }
   command -v htop >/dev/null || { echo "Installing htop...";   sudo "$ENTWARE_ROOT/bin/opkg" install htop; }
   command -v tmux >/dev/null || { echo "Installing tmux...";   sudo "$ENTWARE_ROOT/bin/opkg" install tmux; }
-  command -v ncdu >/dev/null || { echo "Installing ncdu...";   sudo "$ENTWARE_ROOT/bin/opkg" install ncdu; }
+  command -v ncdu >/dev/null  || { echo "Installing ncdu...";   sudo "$ENTWARE_ROOT/bin/opkg" install ncdu; }
+  command -v unzip >/dev/null || { echo "Installing unzip...";  sudo "$ENTWARE_ROOT/bin/opkg" install unzip; }
   # tldr n'est pas dans opkg — tealdeer (client Rust musl) installé plus bas
 
   # micro (not in opkg, install from GitHub)
