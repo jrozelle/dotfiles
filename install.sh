@@ -328,6 +328,7 @@ HOME_FILES=(
   .zshrc
   .gitconfig
   .gitignore_global
+  .tmux.conf
 )
 
 # Directories to symlink to $HOME
