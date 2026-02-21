@@ -83,7 +83,7 @@ if $IS_SYNOLOGY; then
   command -v htop >/dev/null || { echo "Installing htop...";   sudo "$ENTWARE_ROOT/bin/opkg" install htop; }
   command -v tmux >/dev/null || { echo "Installing tmux...";   sudo "$ENTWARE_ROOT/bin/opkg" install tmux; }
   command -v ncdu >/dev/null || { echo "Installing ncdu...";   sudo "$ENTWARE_ROOT/bin/opkg" install ncdu; }
-  command -v tldr >/dev/null || { echo "Installing tldr...";   sudo "$ENTWARE_ROOT/bin/opkg" install tldr; }
+  # tldr n'est pas dans opkg — tealdeer (client Rust musl) installé plus bas
 
   # micro (not in opkg, install from GitHub)
   if ! command -v micro >/dev/null; then
@@ -189,9 +189,105 @@ if $IS_SYNOLOGY; then
     fi
   fi
 
+  # tldr via tealdeer (client Rust musl — opkg ne l'a pas)
+  if ! tldr --version >/dev/null 2>&1; then
+    echo "Installing tealdeer (tldr)..."
+    case "$ARCH" in
+      x86_64)  TLDR_ARCH="x86_64-musl" ;;
+      aarch64) TLDR_ARCH="aarch64-musl" ;;
+      armv7l)  TLDR_ARCH="arm-musleabihf" ;;
+      *)       TLDR_ARCH="" ;;
+    esac
+    if [[ -n "$TLDR_ARCH" ]]; then
+      sudo curl -fsSL "https://github.com/dbrgn/tealdeer/releases/latest/download/tealdeer-linux-${TLDR_ARCH}" \
+        -o "$ENTWARE_ROOT/bin/tldr"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/tldr"
+      tldr --update >/dev/null 2>&1 || true
+    fi
+  fi
+
+  # duf (df moderne — GitHub releases)
+  if ! duf --version >/dev/null 2>&1; then
+    echo "Installing duf..."
+    DUF_VER=$(curl -fsSL https://api.github.com/repos/muesli/duf/releases/latest \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
+    case "$ARCH" in
+      x86_64)  DUF_ARCH="linux_amd64" ;;
+      aarch64) DUF_ARCH="linux_arm64" ;;
+      armv7l)  DUF_ARCH="linux_armv7" ;;
+      *)       DUF_ARCH="" ;;
+    esac
+    if [[ -n "$DUF_ARCH" && -n "$DUF_VER" ]]; then
+      curl -fsSL "https://github.com/muesli/duf/releases/download/v${DUF_VER}/duf_${DUF_VER}_${DUF_ARCH}.tar.gz" \
+        | tar xz -C /tmp duf
+      sudo cp -f /tmp/duf "$ENTWARE_ROOT/bin/duf"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/duf"
+      rm -f /tmp/duf
+    fi
+  fi
+
+  # glow (markdown viewer — GitHub releases)
+  if ! glow --version >/dev/null 2>&1; then
+    echo "Installing glow..."
+    GLOW_VER=$(curl -fsSL https://api.github.com/repos/charmbracelet/glow/releases/latest \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
+    case "$ARCH" in
+      x86_64)  GLOW_ARCH="Linux_x86_64" ;;
+      aarch64) GLOW_ARCH="Linux_arm64" ;;
+      armv7l)  GLOW_ARCH="Linux_armv7" ;;
+      *)       GLOW_ARCH="" ;;
+    esac
+    if [[ -n "$GLOW_ARCH" && -n "$GLOW_VER" ]]; then
+      curl -fsSL "https://github.com/charmbracelet/glow/releases/download/v${GLOW_VER}/glow_${GLOW_VER}_${GLOW_ARCH}.tar.gz" \
+        | tar xz -C /tmp glow
+      sudo cp -f /tmp/glow "$ENTWARE_ROOT/bin/glow"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/glow"
+      rm -f /tmp/glow
+    fi
+  fi
+
+  # sd (sed moderne — GitHub releases, musl static)
+  if ! sd --version >/dev/null 2>&1; then
+    echo "Installing sd..."
+    SD_VER=$(curl -fsSL https://api.github.com/repos/chmln/sd/releases/latest \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
+    case "$ARCH" in
+      x86_64)  SD_ARCH="x86_64-unknown-linux-musl" ;;
+      aarch64) SD_ARCH="aarch64-unknown-linux-musl" ;;
+      *)       SD_ARCH="" ;;
+    esac
+    if [[ -n "$SD_ARCH" && -n "$SD_VER" ]]; then
+      curl -fsSL "https://github.com/chmln/sd/releases/download/v${SD_VER}/sd-v${SD_VER}-${SD_ARCH}.tar.gz" \
+        | tar xz -C /tmp
+      sudo cp -f "/tmp/sd-v${SD_VER}-${SD_ARCH}/sd" "$ENTWARE_ROOT/bin/sd"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/sd"
+      rm -rf "/tmp/sd-v${SD_VER}-${SD_ARCH}"
+    fi
+  fi
+
+  # procs (ps moderne — GitHub releases, zip)
+  if ! procs --version >/dev/null 2>&1; then
+    echo "Installing procs..."
+    PROCS_VER=$(curl -fsSL https://api.github.com/repos/dalance/procs/releases/latest \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
+    case "$ARCH" in
+      x86_64)  PROCS_ARCH="x86_64-linux" ;;
+      aarch64) PROCS_ARCH="aarch64-linux" ;;
+      *)       PROCS_ARCH="" ;;
+    esac
+    if [[ -n "$PROCS_ARCH" && -n "$PROCS_VER" ]]; then
+      curl -fsSL "https://github.com/dalance/procs/releases/download/v${PROCS_VER}/procs-v${PROCS_VER}-${PROCS_ARCH}.zip" \
+        -o /tmp/procs.zip
+      unzip -q -o /tmp/procs.zip procs -d /tmp
+      sudo cp -f /tmp/procs "$ENTWARE_ROOT/bin/procs"
+      sudo chmod 755 "$ENTWARE_ROOT/bin/procs"
+      rm -f /tmp/procs.zip /tmp/procs
+    fi
+  fi
+
   # Ensure all manually-installed binaries are executable (idempotent — fixes
   # previous runs where cp was done without chmod, or where chmod was skipped)
-  for _bin in bat delta gh; do
+  for _bin in bat delta gh tldr duf glow sd procs; do
     [[ -f "$ENTWARE_ROOT/bin/$_bin" ]] && sudo chmod 755 "$ENTWARE_ROOT/bin/$_bin"
   done
   unset _bin
