@@ -58,7 +58,7 @@ fi
 if _has bat; then
   alias cat='bat --paging=never'
   alias less='bat'
-  export BAT_THEME="Monokai Extended"
+  export BAT_THEME="Catppuccin Mocha"
   export MANPAGER="sh -c 'col -bx | bat -l man -p'"
   export MANROFFOPT="-c"
 fi

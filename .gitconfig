@@ -30,14 +30,17 @@
 [diff]
 	colorMoved = default
 
+[include]
+	path = ~/.config/delta/catppuccin.gitconfig
+
 [interactive]
 	diffFilter = delta --color-only
 
 [delta]
+	features = catppuccin-mocha
 	navigate = true
 	side-by-side = true
 	line-numbers = true
-	syntax-theme = Monokai Extended
 
 [alias]
 	st = status

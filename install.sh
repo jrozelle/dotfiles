@@ -262,6 +262,31 @@ if $IS_MAC && command -v brew >/dev/null; then
   fi
 fi
 
+# --------------------
+# Themes: Catppuccin Mocha
+# --------------------
+
+# bat — thème Catppuccin Mocha (aussi utilisé par delta via syntect)
+if command -v bat >/dev/null; then
+  BAT_THEMES_DIR="$(bat --config-dir)/themes"
+  if [[ ! -f "$BAT_THEMES_DIR/Catppuccin Mocha.tmTheme" ]]; then
+    echo "==> Installing Catppuccin Mocha theme for bat"
+    mkdir -p "$BAT_THEMES_DIR"
+    curl -fsSL "https://raw.githubusercontent.com/catppuccin/bat/main/themes/Catppuccin%20Mocha.tmTheme" \
+      -o "$BAT_THEMES_DIR/Catppuccin Mocha.tmTheme"
+    bat cache --build
+  fi
+fi
+
+# delta — couleurs Catppuccin Mocha (téléchargé depuis catppuccin/delta)
+DELTA_CONF_DIR="$HOME/.config/delta"
+if [[ ! -f "$DELTA_CONF_DIR/catppuccin.gitconfig" ]]; then
+  echo "==> Installing Catppuccin theme for delta"
+  mkdir -p "$DELTA_CONF_DIR"
+  curl -fsSL "https://raw.githubusercontent.com/catppuccin/delta/main/catppuccin.gitconfig" \
+    -o "$DELTA_CONF_DIR/catppuccin.gitconfig"
+fi
+
 # Bootstrap zsh plugins (antidote)
 echo "==> Bootstrapping zsh plugins"
 
