@@ -154,60 +154,57 @@ if $IS_SYNOLOGY; then
   # delta (better git diff — GitHub releases, not in opkg)
   if ! command -v delta >/dev/null; then
     echo "Installing delta..."
-    DELTA_VER=$(curl -fsSL https://api.github.com/repos/dandavison/delta/releases/latest \
-      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\(.*\)".*/\1/')
     case "$ARCH" in
-      x86_64)  DELTA_ARCH="x86_64-unknown-linux-musl" ;;
-      aarch64) DELTA_ARCH="aarch64-unknown-linux-gnu" ;;
-      *)       DELTA_ARCH="" ;;
+      x86_64)  _pat="x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="aarch64-unknown-linux-gnu.tar.gz" ;;
+      *)       _pat="" ;;
     esac
-    if [[ -n "$DELTA_ARCH" && -n "$DELTA_VER" ]]; then
-      curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_ARCH}.tar.gz" \
-        | tar xz -C /tmp
-      sudo cp -f "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}/delta" "$ENTWARE_ROOT/bin/delta"
-      sudo chmod 755 "$ENTWARE_ROOT/bin/delta"
-      rm -rf "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}"
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url dandavison/delta "$_pat")
+      [[ -n "$_url" ]] && mkdir -p /tmp/delta-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/delta-install \
+        && _install_bin /tmp/delta-install delta "$ENTWARE_ROOT/bin" \
+        && rm -rf /tmp/delta-install
     fi
+    unset _pat _url
   fi
 
   # bat (syntax highlighting — GitHub releases, not in opkg)
   if ! command -v bat >/dev/null; then
     echo "Installing bat..."
-    BAT_VER=$(curl -fsSL https://api.github.com/repos/sharkdp/bat/releases/latest \
-      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
     case "$ARCH" in
-      x86_64)  BAT_ARCH="x86_64-unknown-linux-musl" ;;
-      aarch64) BAT_ARCH="aarch64-unknown-linux-musl" ;;
-      armv7l)  BAT_ARCH="arm-unknown-linux-musleabihf" ;;
-      *)       BAT_ARCH="" ;;
+      x86_64)  _pat="x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="aarch64-unknown-linux-musl.tar.gz" ;;
+      armv7l)  _pat="arm-unknown-linux-musleabihf.tar.gz" ;;
+      *)       _pat="" ;;
     esac
-    if [[ -n "$BAT_ARCH" && -n "$BAT_VER" ]]; then
-      curl -fsSL "https://github.com/sharkdp/bat/releases/download/v${BAT_VER}/bat-v${BAT_VER}-${BAT_ARCH}.tar.gz" \
-        | tar xz -C /tmp
-      sudo cp -f "/tmp/bat-v${BAT_VER}-${BAT_ARCH}/bat" "$ENTWARE_ROOT/bin/bat"
-      sudo chmod 755 "$ENTWARE_ROOT/bin/bat"
-      rm -rf "/tmp/bat-v${BAT_VER}-${BAT_ARCH}"
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url sharkdp/bat "$_pat")
+      [[ -n "$_url" ]] && mkdir -p /tmp/bat-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/bat-install \
+        && _install_bin /tmp/bat-install bat "$ENTWARE_ROOT/bin" \
+        && rm -rf /tmp/bat-install
     fi
+    unset _pat _url
   fi
 
   # gh (GitHub CLI — GitHub releases, not in opkg)
   if ! command -v gh >/dev/null; then
     echo "Installing gh (GitHub CLI)..."
-    GH_VER=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest \
-      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
     case "$ARCH" in
-      x86_64)  GH_ARCH="linux_amd64" ;;
-      aarch64) GH_ARCH="linux_arm64" ;;
-      armv7l)  GH_ARCH="linux_armv6" ;;
-      *)       GH_ARCH="" ;;
+      x86_64)  _pat="linux_amd64.tar.gz" ;;
+      aarch64) _pat="linux_arm64.tar.gz" ;;
+      armv7l)  _pat="linux_armv6.tar.gz" ;;
+      *)       _pat="" ;;
     esac
-    if [[ -n "$GH_ARCH" && -n "$GH_VER" ]]; then
-      curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VER}/gh_${GH_VER}_${GH_ARCH}.tar.gz" \
-        | tar xz -C /tmp
-      sudo cp -f "/tmp/gh_${GH_VER}_${GH_ARCH}/bin/gh" "$ENTWARE_ROOT/bin/gh"
-      sudo chmod 755 "$ENTWARE_ROOT/bin/gh"
-      rm -rf "/tmp/gh_${GH_VER}_${GH_ARCH}"
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url cli/cli "$_pat")
+      [[ -n "$_url" ]] && mkdir -p /tmp/gh-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/gh-install \
+        && _install_bin /tmp/gh-install gh "$ENTWARE_ROOT/bin" \
+        && rm -rf /tmp/gh-install
     fi
+    unset _pat _url
   fi
 
   # yq (YAML processor — single static binary)
@@ -401,16 +398,16 @@ if $IS_LINUX; then
   if command -v apt-get >/dev/null; then
     echo "==> Installing core packages (apt)"
     sudo apt-get update -qq
-    sudo apt-get install -y git zsh curl wget unzip tmux htop ncdu jq
+    sudo apt-get install -y git zsh curl wget unzip tmux htop btop ncdu jq
   elif command -v dnf >/dev/null; then
     echo "==> Installing core packages (dnf)"
-    sudo dnf install -y git zsh curl wget unzip tmux htop ncdu jq
+    sudo dnf install -y git zsh curl wget unzip tmux htop btop ncdu jq
   elif command -v pacman >/dev/null; then
     echo "==> Installing core packages (pacman)"
-    sudo pacman -S --noconfirm git zsh curl wget unzip tmux htop ncdu jq
+    sudo pacman -S --noconfirm git zsh curl wget unzip tmux htop btop ncdu jq
   elif command -v zypper >/dev/null; then
     echo "==> Installing core packages (zypper)"
-    sudo zypper install -n git zsh curl wget unzip tmux htop ncdu jq
+    sudo zypper install -n git zsh curl wget unzip tmux htop btop ncdu jq
   else
     echo "WARN: Package manager not detected. Ensure git, zsh, curl, tmux, htop are installed."
   fi
@@ -521,45 +518,37 @@ if $IS_LINUX; then
   if ! command -v delta >/dev/null; then
     echo "Installing delta..."
     case "$ARCH" in
-      x86_64)  DELTA_ARCH="x86_64-unknown-linux-musl" ;;
-      aarch64) DELTA_ARCH="aarch64-unknown-linux-gnu" ;;
-      *)       DELTA_ARCH="" ;;
+      x86_64)  _pat="x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="aarch64-unknown-linux-gnu.tar.gz" ;;
+      *)       _pat="" ;;
     esac
-    if [[ -n "$DELTA_ARCH" ]]; then
-      DELTA_VER=$(curl -fsSL https://api.github.com/repos/dandavison/delta/releases/latest \
-        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "\(.*\)".*/\1/')
-      if [[ -n "$DELTA_VER" ]]; then
-        curl -fsSL "https://github.com/dandavison/delta/releases/download/${DELTA_VER}/delta-${DELTA_VER}-${DELTA_ARCH}.tar.gz" \
-          | tar xz -C /tmp
-        sudo cp -f "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}/delta" "$DEST/delta"
-        sudo chmod 755 "$DEST/delta"
-        rm -rf "/tmp/delta-${DELTA_VER}-${DELTA_ARCH}"
-      fi
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url dandavison/delta "$_pat")
+      [[ -n "$_url" ]] && mkdir -p /tmp/delta-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/delta-install \
+        && _install_bin /tmp/delta-install delta "$DEST" \
+        && rm -rf /tmp/delta-install
     fi
-    unset DELTA_ARCH DELTA_VER
+    unset _pat _url
   fi
 
   # --- bat ---
   if ! command -v bat >/dev/null; then
     echo "Installing bat..."
     case "$ARCH" in
-      x86_64)  BAT_ARCH="x86_64-unknown-linux-musl" ;;
-      aarch64) BAT_ARCH="aarch64-unknown-linux-musl" ;;
-      armv7l)  BAT_ARCH="arm-unknown-linux-musleabihf" ;;
-      *)       BAT_ARCH="" ;;
+      x86_64)  _pat="x86_64-unknown-linux-musl.tar.gz" ;;
+      aarch64) _pat="aarch64-unknown-linux-musl.tar.gz" ;;
+      armv7l)  _pat="arm-unknown-linux-musleabihf.tar.gz" ;;
+      *)       _pat="" ;;
     esac
-    if [[ -n "$BAT_ARCH" ]]; then
-      BAT_VER=$(curl -fsSL https://api.github.com/repos/sharkdp/bat/releases/latest \
-        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
-      if [[ -n "$BAT_VER" ]]; then
-        curl -fsSL "https://github.com/sharkdp/bat/releases/download/v${BAT_VER}/bat-v${BAT_VER}-${BAT_ARCH}.tar.gz" \
-          | tar xz -C /tmp
-        sudo cp -f "/tmp/bat-v${BAT_VER}-${BAT_ARCH}/bat" "$DEST/bat"
-        sudo chmod 755 "$DEST/bat"
-        rm -rf "/tmp/bat-v${BAT_VER}-${BAT_ARCH}"
-      fi
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url sharkdp/bat "$_pat")
+      [[ -n "$_url" ]] && mkdir -p /tmp/bat-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/bat-install \
+        && _install_bin /tmp/bat-install bat "$DEST" \
+        && rm -rf /tmp/bat-install
     fi
-    unset BAT_ARCH BAT_VER
+    unset _pat _url
   fi
 
   # --- ripgrep (rg — requis pour nvim telescope) ---
@@ -608,23 +597,19 @@ if $IS_LINUX; then
   if ! command -v gh >/dev/null; then
     echo "Installing gh (GitHub CLI)..."
     case "$ARCH" in
-      x86_64)  GH_ARCH="linux_amd64" ;;
-      aarch64) GH_ARCH="linux_arm64" ;;
-      armv7l)  GH_ARCH="linux_armv6" ;;
-      *)       GH_ARCH="" ;;
+      x86_64)  _pat="linux_amd64.tar.gz" ;;
+      aarch64) _pat="linux_arm64.tar.gz" ;;
+      armv7l)  _pat="linux_armv6.tar.gz" ;;
+      *)       _pat="" ;;
     esac
-    if [[ -n "$GH_ARCH" ]]; then
-      GH_VER=$(curl -fsSL https://api.github.com/repos/cli/cli/releases/latest \
-        | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": "v\(.*\)".*/\1/')
-      if [[ -n "$GH_VER" ]]; then
-        curl -fsSL "https://github.com/cli/cli/releases/download/v${GH_VER}/gh_${GH_VER}_${GH_ARCH}.tar.gz" \
-          | tar xz -C /tmp
-        sudo cp -f "/tmp/gh_${GH_VER}_${GH_ARCH}/bin/gh" "$DEST/gh"
-        sudo chmod 755 "$DEST/gh"
-        rm -rf "/tmp/gh_${GH_VER}_${GH_ARCH}"
-      fi
+    if [[ -n "$_pat" ]]; then
+      _url=$(_gh_dl_url cli/cli "$_pat")
+      [[ -n "$_url" ]] && mkdir -p /tmp/gh-install \
+        && curl -fsSL "$_url" | tar xz -C /tmp/gh-install \
+        && _install_bin /tmp/gh-install gh "$DEST" \
+        && rm -rf /tmp/gh-install
     fi
-    unset GH_ARCH GH_VER
+    unset _pat _url
   fi
 
   # --- yq ---
