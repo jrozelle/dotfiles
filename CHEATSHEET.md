@@ -472,6 +472,17 @@ cd ~/dotfiles && ./install.sh
 exec zsh
 ```
 
+### Linux (Ubuntu/Debian, Fedora, Arch, openSUSE)
+```bash
+git clone https://github.com/jrozelle/dotfiles.git ~/dotfiles
+cd ~/dotfiles && ./install.sh
+exec zsh
+```
+*Note : install.sh détecte apt/dnf/pacman/zypper pour les dépendances de base,
+puis télécharge tous les outils modernes (bat, eza, delta, starship…) depuis
+GitHub releases sous `/usr/local/bin` — aucune dépendance build, fonctionne
+sur n'importe quelle distro x86_64/arm64/armv7.*
+
 ### Synology
 ```bash
 git clone https://github.com/jrozelle/dotfiles.git ~/dotfiles
