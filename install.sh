@@ -206,12 +206,21 @@ if $IS_SYNOLOGY; then
     fi
   fi
 
-  # _gh_dl_url OWNER/REPO GREP_PATTERN
-  # Récupère le browser_download_url depuis l'API GitHub (|| true = safe avec set -e)
+  # Helpers pour l'installation de binaires depuis GitHub releases
+  # _gh_dl_url OWNER/REPO PATTERN → URL du release asset correspondant
   _gh_dl_url() {
     curl -fsSL "https://api.github.com/repos/$1/releases/latest" \
       | grep '"browser_download_url"' | grep "$2" | head -1 \
       | sed 's/.*"browser_download_url": *"\([^"]*\)".*/\1/' || true
+  }
+  # _install_bin EXTRACT_DIR BINARY_NAME DEST_DIR → find + cp + chmod 755
+  _install_bin() {
+    local _b
+    _b=$(find "$1" -name "$2" -type f | head -1)
+    if [[ -n "$_b" ]]; then
+      sudo cp -f "$_b" "$3/$2"
+      sudo chmod 755 "$3/$2"
+    fi
   }
 
   # duf (df moderne)
@@ -228,8 +237,7 @@ if $IS_SYNOLOGY; then
       if [[ -n "$_url" ]]; then
         mkdir -p /tmp/duf-install
         curl -fsSL "$_url" | tar xz -C /tmp/duf-install
-        sudo cp -f /tmp/duf-install/duf "$ENTWARE_ROOT/bin/duf"
-        sudo chmod 755 "$ENTWARE_ROOT/bin/duf"
+        _install_bin /tmp/duf-install duf "$ENTWARE_ROOT/bin"
         rm -rf /tmp/duf-install
       fi
     fi
@@ -249,8 +257,7 @@ if $IS_SYNOLOGY; then
       if [[ -n "$_url" ]]; then
         mkdir -p /tmp/glow-install
         curl -fsSL "$_url" | tar xz -C /tmp/glow-install
-        sudo cp -f /tmp/glow-install/glow "$ENTWARE_ROOT/bin/glow"
-        sudo chmod 755 "$ENTWARE_ROOT/bin/glow"
+        _install_bin /tmp/glow-install glow "$ENTWARE_ROOT/bin"
         rm -rf /tmp/glow-install
       fi
     fi
@@ -269,12 +276,7 @@ if $IS_SYNOLOGY; then
       if [[ -n "$_url" ]]; then
         mkdir -p /tmp/sd-install
         curl -fsSL "$_url" | tar xz -C /tmp/sd-install
-        # binaire peut être à la racine ou dans un sous-répertoire
-        _sd_bin=$(find /tmp/sd-install -name sd -type f | head -1)
-        if [[ -n "$_sd_bin" ]]; then
-          sudo cp -f "$_sd_bin" "$ENTWARE_ROOT/bin/sd"
-          sudo chmod 755 "$ENTWARE_ROOT/bin/sd"
-        fi
+        _install_bin /tmp/sd-install sd "$ENTWARE_ROOT/bin"
         rm -rf /tmp/sd-install
       fi
     fi
@@ -300,8 +302,8 @@ if $IS_SYNOLOGY; then
     fi
   fi
 
-  unset -f _gh_dl_url
-  unset _pat _url _sd_bin
+  unset -f _gh_dl_url _install_bin
+  unset _pat _url _b
 
   # Ensure all manually-installed binaries are executable (idempotent — fixes
   # previous runs where cp was done without chmod, or where chmod was skipped)
