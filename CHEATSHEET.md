@@ -1,4 +1,8 @@
-# Cheatsheet - Les Essentiels
+# Cheatsheet — Les Essentiels
+
+> Ouvrir ce fichier : `md ~/dotfiles/CHEATSHEET.md`
+
+---
 
 ## Raccourcis Clavier (Ligne de commande)
 
@@ -27,16 +31,6 @@
 | `Ctrl+U` | Supprimer jusqu'au début de ligne |
 | `Ctrl+K` | Supprimer jusqu'à la fin de ligne |
 
-### Sélection (Shift+flèches)
-
-| Raccourci | Description |
-|-----------|-------------|
-| `Shift+←/→` | Sélectionner caractère |
-| `Shift+↑/↓` | Sélectionner ligne |
-| `Shift+Option+←/→` | Sélectionner mot |
-
-*Note : Supprimer avec Backspace, ou copier avec `Ctrl+W` puis coller avec `Ctrl+Y`*
-
 ### Copier/Coller (kill ring)
 
 | Raccourci | Description |
@@ -50,12 +44,12 @@
 
 | Raccourci | Description |
 |-----------|-------------|
-| `Ctrl+R` | Recherche fuzzy (fzf) |
+| `Ctrl+R` | Recherche fuzzy dans l'historique (fzf) |
 | `Ctrl+P` / `↑` | Commande précédente |
 | `Ctrl+N` / `↓` | Commande suivante |
 | `!!` | Répéter dernière commande |
-| `!$` | Dernier argument |
-| `!*` | Tous les arguments |
+| `!$` | Dernier argument de la commande précédente |
+| `!*` | Tous les arguments de la commande précédente |
 
 ### Divers
 
@@ -78,12 +72,40 @@
 | `....` | Remonter de 3 niveaux |
 | `~` | Aller au home |
 
+---
+
+## zoxide — Navigation intelligente
+
+> `z` remplace `cd` : il apprend les répertoires visités et saute directement.
+
+| Commande | Description |
+|----------|-------------|
+| `z foo` | cd vers le répertoire le plus visité contenant "foo" |
+| `z foo bar` | Affine avec plusieurs termes |
+| `z -` | Répertoire précédent |
+| `zi` | Sélection interactive via fzf |
+| `z ..` | Remonter d'un niveau (comme cd ..) |
+
+---
+
+## fzf — Fuzzy Finder
+
+| Raccourci | Description |
+|-----------|-------------|
+| `Ctrl+R` | Recherche dans l'historique |
+| `Ctrl+T` | Recherche fichier (insère le chemin) |
+| `Alt+C` | cd dans un dossier |
+
+> Dans une fenêtre fzf : `↑↓` pour naviguer, `Enter` pour valider, `Tab` pour sélectionner plusieurs, `Ctrl+C` pour annuler.
+
+---
+
 ## Fichiers (eza/ls)
 
 | Alias | Description |
 |-------|-------------|
-| `l` | Liste détaillée + cachés |
-| `ll` | Liste détaillée |
+| `l` | Liste détaillée + cachés + statut git |
+| `ll` | Liste détaillée + statut git |
 | `la` | Liste avec cachés |
 | `lt` | Trié par date (récent en bas) |
 | `tree` | Arborescence niveau 2 |
@@ -98,15 +120,34 @@
 | `rm` | Suppression interactive + verbose |
 | `mkdir` | Création récursive + verbose |
 
+---
+
+## Fonctions utilitaires
+
+| Commande | Description |
+|----------|-------------|
+| `mkcd <dossier>` | Crée un dossier et s'y déplace |
+| `extract <archive>` | Extrait n'importe quelle archive (tar, zip, gz, 7z…) |
+| `bak <fichier>` | Copie horodatée avant de modifier un fichier sensible |
+| `myip` | Affiche l'IP publique |
+| `pingg` | Ping 1.1.1.1 (5 paquets) |
+| `ports` | Liste les ports en écoute |
+| `md <fichier.md>` | Affiche un fichier Markdown dans le terminal (glow) |
+| `df` | Espace disque par partition (duf) |
+
+---
+
 ## Recherche
 
 | Alias | Description |
 |-------|-------------|
 | `g` | grep avec numéros de ligne + couleurs |
 | `rg` | ripgrep smart-case |
-| `find` | fd (si installé) |
-| `cat` | bat avec coloration (si installé) |
+| `find` | fd (si installé — respecte .gitignore) |
+| `cat` | bat avec coloration syntaxique (si installé) |
 | `less` | bat (si installé) |
+
+---
 
 ## Git
 
@@ -145,22 +186,91 @@
 | `git unstage` | unstage fichiers |
 | `git wip` | commit WIP rapide |
 
+---
+
 ## Docker
 
 | Alias | Description |
 |-------|-------------|
 | `d` | docker |
 | `dc` | docker compose |
-| `dps` | Liste containers actifs |
+| `dps` | Liste containers actifs (nom, statut, ports) |
 | `dpsa` | Liste tous les containers |
-| `dlog <nom>` | Logs en temps réel (200 lignes) |
-| `dexec <nom>` | Exec interactif dans container |
+| `dlog <nom>` | Logs container en temps réel (200 lignes) |
+| `dclog` | Logs docker compose en temps réel |
+| `dexec <nom>` | Exec interactif dans un container |
 | `dstats` | Stats CPU/RAM/Network temps réel |
-| `dsh <nom>` | Shell dans container (bash ou sh) |
+| `dsh <nom>` | Shell dans un container (bash ou sh) |
 | `dre <nom>` | Restart + affiche logs |
 | `dup` | Pull images + rebuild (dans dossier compose) |
 | `dclean` | Nettoyer containers/images/volumes orphelins |
 | `ddf` | Espace disque Docker détaillé |
+
+---
+
+## tmux
+
+> Préfixe par défaut : `Ctrl+B`
+
+### Sessions
+
+| Commande | Description |
+|----------|-------------|
+| `tmux` | Nouvelle session |
+| `tmux new -s <nom>` | Nouvelle session nommée |
+| `tmux ls` | Lister les sessions |
+| `tmux attach` | Rattacher la dernière session |
+| `tmux attach -t <nom>` | Rattacher une session nommée |
+| `Préfixe + d` | Detach (session reste active) |
+| `Préfixe + $` | Renommer la session |
+| `Préfixe + s` | Choisir session (interactif) |
+
+### Fenêtres (onglets)
+
+| Raccourci | Description |
+|-----------|-------------|
+| `Préfixe + c` | Nouvelle fenêtre |
+| `Préfixe + ,` | Renommer fenêtre |
+| `Préfixe + n/p` | Fenêtre suivante/précédente |
+| `Préfixe + 1-9` | Aller à la fenêtre n |
+| `Préfixe + &` | Fermer fenêtre |
+| `Préfixe + w` | Liste fenêtres (interactif) |
+
+### Panes (splits)
+
+| Raccourci | Description |
+|-----------|-------------|
+| `Préfixe + \|` | Split vertical |
+| `Préfixe + -` | Split horizontal |
+| `Alt+←↑↓→` | Changer de pane (sans préfixe) |
+| `Préfixe + z` | Zoom/dézoom pane actuel |
+| `Préfixe + x` | Fermer pane |
+| `Préfixe + {/}` | Déplacer pane gauche/droite |
+| `Préfixe + Espace` | Changer disposition |
+
+### Scroll & Copie
+
+| Raccourci | Description |
+|-----------|-------------|
+| Scroll souris | Scroll direct (mouse on) |
+| `Préfixe + [` | Entrer en mode copie |
+| `v` | Début de sélection (mode vi) |
+| `y` | Copier sélection + quitter mode copie |
+| `Ctrl+V` | Sélection rectangulaire |
+| `q` / `Esc` | Quitter mode copie |
+| `Préfixe + ]` | Coller |
+
+### Divers
+
+| Raccourci | Description |
+|-----------|-------------|
+| `Préfixe + r` | Recharger ~/.tmux.conf |
+| `Préfixe + t` | Afficher l'heure |
+| `Préfixe + ?` | Aide (tous les raccourcis) |
+
+> **SSH** : connexion SSH → attach automatique à la session "main" (ou création).
+
+---
 
 ## Réseau / Système
 
@@ -169,16 +279,9 @@
 | `myip` | Affiche IP publique |
 | `pingg` | Ping 1.1.1.1 (5 paquets) |
 | `ports` | Liste ports en écoute |
+| `df` | Espace disque (duf) |
 | `flushdns` | Vider cache DNS (macOS) |
 | `brewup` | Mise à jour Homebrew (macOS) |
-
-## fzf (Fuzzy Finder)
-
-| Raccourci | Description |
-|-----------|-------------|
-| `Ctrl+R` | Recherche dans l'historique |
-| `Ctrl+T` | Recherche fichier |
-| `Alt+C` | cd dans un dossier |
 
 ---
 
@@ -352,7 +455,7 @@ hsplit <fichier>        # Split horizontal
 
 Le prompt affiche automatiquement :
 - **Répertoire** (tronqué à 4 niveaux)
-- **Branche git** + statut (!, +, ?, ⇡, ⇣)
+- **Branche git** + statut (`!` modifié, `+` staged, `?` non-tracké, `⇡` ahead, `⇣` behind)
 - **Contexte Docker** (si docker-compose présent)
 - **Durée commande** (si > 2s)
 - **Heure** (à droite)
