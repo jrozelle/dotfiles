@@ -11,6 +11,7 @@ add_newline = true
 format = """
 [](fg:#a3aed2)\
 $os\
+$username\
 $hostname\
 [](bg:#769ff0 fg:#a3aed2)\
 $directory\
@@ -155,6 +156,14 @@ Fedora  = "󰣛"
 Arch    = "󰣇"
 Windows = "󰍲"
 Unknown = "󰈺"
+
+# ─── Username (SSH / root) ───────────────────────────────────────────────────
+
+[username]
+show_always = false
+style_user = "bg:#a3aed2 fg:#090c0c bold"
+style_root = "bg:#a3aed2 fg:#f7768e bold"
+format = '[$user ]($style)'
 
 # ─── Hostname (SSH) ───────────────────────────────────────────────────────────
 
