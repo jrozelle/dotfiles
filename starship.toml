@@ -11,6 +11,7 @@ add_newline = true
 format = """
 [](fg:#a3aed2)\
 $os\
+$hostname\
 [](bg:#769ff0 fg:#a3aed2)\
 $directory\
 [](fg:#769ff0 bg:#394260)\
