@@ -57,7 +57,7 @@ format   = "[@$hostname]($style) "
 [directory]
 style              = "bold #89b4fa"
 format             = "[$path]($style)[$read_only]($read_only_style) "
-truncation_length  = 3
+truncation_length  = 4
 truncation_symbol  = "…/"
 truncate_to_repo   = true
 read_only          = " 󰌾"
@@ -65,9 +65,9 @@ read_only_style    = "bold #f38ba8"
 
 [directory.substitutions]
 "Documents" = "󰈙 Docs"
-"Downloads" = "󰁂 Downloads"
+"Downloads" = " Downloads"
 "Music"     = "󰝚 Music"
-"Pictures"  = "󰋯 Pictures"
+"Pictures"  = " Pictures"
 "Developer" = "󰲋 Dev"
 
 # ─── Git ─────────────────────────────────────────────────────────────────────
