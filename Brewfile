@@ -4,7 +4,6 @@
 # Shell & prompt
 brew "starship"
 brew "antidote"
-brew "tmux"
 
 # Modern CLI replacements
 brew "eza"       # ls

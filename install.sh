@@ -106,7 +106,6 @@ if $IS_SYNOLOGY; then
   command -v eza >/dev/null  || { echo "Installing eza...";    sudo "$ENTWARE_ROOT/bin/opkg" install eza; }
   command -v fzf >/dev/null  || { echo "Installing fzf...";    sudo "$ENTWARE_ROOT/bin/opkg" install fzf; }
   command -v htop >/dev/null || { echo "Installing htop...";   sudo "$ENTWARE_ROOT/bin/opkg" install htop; }
-  command -v tmux >/dev/null || { echo "Installing tmux...";   sudo "$ENTWARE_ROOT/bin/opkg" install tmux; }
   command -v ncdu >/dev/null  || { echo "Installing ncdu...";   sudo "$ENTWARE_ROOT/bin/opkg" install ncdu; }
   command -v unzip >/dev/null || { echo "Installing unzip...";  sudo "$ENTWARE_ROOT/bin/opkg" install unzip; }
   # tldr n'est pas dans opkg — tealdeer (client Rust musl) installé plus bas
@@ -394,23 +393,23 @@ if $IS_LINUX; then
   DEST="/usr/local/bin"
 
   # --- Package manager: core deps ---
-  # On n'installe que les outils sans binaire statique portable (git, zsh, tmux…)
+  # On n'installe que les outils sans binaire statique portable (git, zsh…)
   # Tout le reste vient de GitHub releases comme sur Synology.
   if command -v apt-get >/dev/null; then
     echo "==> Installing core packages (apt)"
     sudo apt-get update -qq
-    sudo apt-get install -y git zsh curl wget unzip tmux htop btop ncdu jq
+    sudo apt-get install -y git zsh curl wget unzip htop btop ncdu jq
   elif command -v dnf >/dev/null; then
     echo "==> Installing core packages (dnf)"
-    sudo dnf install -y git zsh curl wget unzip tmux htop btop ncdu jq
+    sudo dnf install -y git zsh curl wget unzip htop btop ncdu jq
   elif command -v pacman >/dev/null; then
     echo "==> Installing core packages (pacman)"
-    sudo pacman -S --noconfirm git zsh curl wget unzip tmux htop btop ncdu jq
+    sudo pacman -S --noconfirm git zsh curl wget unzip htop btop ncdu jq
   elif command -v zypper >/dev/null; then
     echo "==> Installing core packages (zypper)"
-    sudo zypper install -n git zsh curl wget unzip tmux htop btop ncdu jq
+    sudo zypper install -n git zsh curl wget unzip htop btop ncdu jq
   else
-    echo "WARN: Package manager not detected. Ensure git, zsh, curl, tmux, htop are installed."
+    echo "WARN: Package manager not detected. Ensure git, zsh, curl, htop are installed."
   fi
 
   # --- neovim (GitHub releases — évite les versions obsolètes des dépôts) ---
@@ -778,7 +777,6 @@ HOME_FILES=(
   .zshrc
   .gitconfig
   .gitignore_global
-  .tmux.conf
 )
 
 # Directories to symlink to $HOME
