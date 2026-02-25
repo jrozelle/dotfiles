@@ -13,15 +13,6 @@ $hostname\
 $directory\
 $git_branch\
 $git_status\
-$python\
-$nodejs\
-$rust\
-$golang\
-$c\
-$kotlin\
-$java\
-$haskell\
-$php\
 $docker_context\
 $cmd_duration\
 $line_break\
@@ -100,52 +91,6 @@ ahead      = "⇡${count}"
 behind     = "⇣${count}"
 diverged   = "⇕⇡${ahead_count}⇣${behind_count}"
 
-# ─── Languages ───────────────────────────────────────────────────────────────
-
-[python]
-symbol = " "
-style  = "bold #f9e2af"
-format = '[$symbol($version )(\($virtualenv\) )]($style)'
-
-[nodejs]
-symbol = " "
-style  = "bold #a6e3a1"
-format = "[$symbol($version )]($style)"
-
-[rust]
-symbol = " "
-style  = "bold #fab387"
-format = "[$symbol($version )]($style)"
-
-[golang]
-symbol = " "
-style  = "bold #94e2d5"
-format = "[$symbol($version )]($style)"
-
-[c]
-symbol = " "
-style  = "bold #89b4fa"
-format = "[$symbol($version )]($style)"
-
-[java]
-symbol = " "
-style  = "bold #f38ba8"
-format = "[$symbol($version )]($style)"
-
-[kotlin]
-symbol = " "
-style  = "bold #cba6f7"
-format = "[$symbol($version )]($style)"
-
-[haskell]
-symbol = " "
-style  = "bold #cba6f7"
-format = "[$symbol($version )]($style)"
-
-[php]
-symbol = " "
-style  = "bold #89b4fa"
-format = "[$symbol($version )]($style)"
 
 # ─── Docker ──────────────────────────────────────────────────────────────────
 
