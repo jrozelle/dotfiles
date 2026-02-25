@@ -74,9 +74,9 @@ read_only_style    = "bold #f38ba8"
 
 [directory.substitutions]
 "Documents" = "󰈙 Docs"
-"Downloads" = " Downloads"
-"Music"     = " Music"
-"Pictures"  = " Pictures"
+"Downloads" = "󰐻 Downloads"
+"Music"     = "󰝚 Music"
+"Pictures"  = "󰈚 Pictures"
 "Developer" = "󰲋 Dev"
 
 # ─── Git ─────────────────────────────────────────────────────────────────────
