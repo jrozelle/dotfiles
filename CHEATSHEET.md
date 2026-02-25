@@ -252,13 +252,17 @@
 
 | Raccourci | Description |
 |-----------|-------------|
-| Scroll souris | Scroll direct (mouse on) |
-| `Préfixe + [` | Entrer en mode copie |
+| Scroll souris | Entre en mode copie et défile dans le buffer |
+| `Préfixe + [` | Entrer en mode copie manuellement |
 | `v` | Début de sélection (mode vi) |
 | `y` | Copier sélection + quitter mode copie |
 | `Ctrl+V` | Sélection rectangulaire |
 | `q` / `Esc` | Quitter mode copie |
 | `Préfixe + ]` | Coller |
+
+> **Prérequis iTerm2** : le scroll souris ne fonctionne que si "Enable mouse
+> reporting" est activé dans `Preferences → Profiles → [profil] → Terminal`.
+> Sans ça, la molette envoie des flèches ↑↓ à zsh → navigation dans l'historique.
 
 ### Divers
 
