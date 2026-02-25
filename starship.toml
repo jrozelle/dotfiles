@@ -45,9 +45,9 @@ truncate_to_repo = true
 
 [directory.substitutions]
 "Documents" = "󰈙 "
-"Downloads"  = "󰉖 "
-"Music"      = "󰝚 "
-"Pictures"   = "󰏥 "
+"Downloads"  = " "
+"Music"      = " "
+"Pictures"   = " "
 "Developer"  = "󰲋 "
 
 # ─── Git ─────────────────────────────────────────────────────────────────────
