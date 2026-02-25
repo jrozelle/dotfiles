@@ -29,10 +29,11 @@ $python\
 [](fg:#212736 bg:#1d2230)\
 $docker_context\
 $conda\
-$time\
 [ ](fg:#1d2230)\
 $cmd_duration\
 \n$character"""
+
+right_format = "$time"
 
 # ─── Directory ───────────────────────────────────────────────────────────────
 
@@ -127,8 +128,8 @@ ignore_base = false
 [time]
 disabled = false
 time_format = "%R"
-style = "bg:#1d2230"
-format = '[[  $time ](fg:#a0a9cb bg:#1d2230)]($style)'
+style = "fg:#a0a9cb"
+format = '[ $time ]($style)'
 
 # ─── Duration ────────────────────────────────────────────────────────────────
 
