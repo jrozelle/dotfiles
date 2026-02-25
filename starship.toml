@@ -1,18 +1,13 @@
-# Starship prompt config
-# Palette: Catppuccin Mocha
-# Docs: https://starship.rs/config/
+"$schema" = 'https://starship.rs/config-schema.json'
 
-# Timeout for commands (ms)
+# Starship prompt — Hybrid: simple text + Nerd Font icons + Catppuccin Mocha colors
+
 command_timeout = 1000
+scan_timeout    = 100
+add_newline     = true
 
-# Scan timeout for directory detection (ms) - default 30, increase for large dirs
-scan_timeout = 100
-
-# Newline before prompt
-add_newline = true
-
-# Prompt format
 format = """
+$os\
 $username\
 $hostname\
 $directory\
@@ -25,53 +20,111 @@ $character"""
 
 right_format = "$time"
 
-[time]
+# ─── OS Icon ─────────────────────────────────────────────────────────────────
+
+[os]
 disabled = false
-time_format = "%H:%M"
-style = "#6c7086"
+style    = "bold #ffffff"
+format   = "[$symbol]($style) "
+
+[os.symbols]
+Macos   = "󰀵"
+Linux   = "󰌽"
+Ubuntu  = "󰕈"
+Debian  = "󰣚"
+Fedora  = "󰣛"
+Arch    = "󰣇"
+Windows = "󰍲"
+Unknown = "󰈺"
+
+# ─── Username (SSH / root) ───────────────────────────────────────────────────
 
 [username]
 show_always = false
-style_user = "bold #f9e2af"
-format = "[$user]($style)"
+style_user  = "bold #f9e2af"
+style_root  = "bold #f38ba8"
+format      = "[$user]($style)"
+
+# ─── Hostname (SSH) ──────────────────────────────────────────────────────────
 
 [hostname]
 ssh_only = true
-style = "bold #fab387"
-format = "[@$hostname]($style) "
+style    = "bold #fab387"
+format   = "[@$hostname]($style) "
+
+# ─── Directory ───────────────────────────────────────────────────────────────
 
 [directory]
-truncation_length = 4
-truncate_to_repo = true
-style = "bold #89b4fa"
+style              = "bold #89b4fa"
+format             = "[$path]($style)[$read_only]($read_only_style) "
+truncation_length  = 4
+truncation_symbol  = "…/"
+truncate_to_repo   = true
+read_only          = " 󰌾"
+read_only_style    = "bold #f38ba8"
+
+[directory.substitutions]
+"Documents" = "󰈙 Docs"
+"Downloads" = " Downloads"
+"Music"     = "󰝚 Music"
+"Pictures"  = " Pictures"
+"Developer" = "󰲋 Dev"
+
+# ─── Git ─────────────────────────────────────────────────────────────────────
 
 [git_branch]
-symbol = " "
-style = "bold #cba6f7"
+symbol = " "
+style  = "bold #cba6f7"
+format = "on [$symbol$branch(:$remote_branch)]($style) "
 
 [git_status]
-style = "#f38ba8"
+style      = "#f38ba8"
+format     = '([$all_status$ahead_behind]($style) )'
 conflicted = "="
-ahead = "⇡${count}"
-behind = "⇣${count}"
-diverged = "⇕⇡${ahead_count}⇣${behind_count}"
-untracked = "?"
-stashed = "\\$"
-modified = "!"
-staged = "[+](#a6e3a1)"
-renamed = "»"
-deleted = "✘"
+untracked  = "?"
+stashed    = "\\$"
+modified   = "!"
+staged     = "[+](#a6e3a1)"
+renamed    = "»"
+deleted    = "✘"
+ahead      = "⇡${count}"
+behind     = "⇣${count}"
+diverged   = "⇕⇡${ahead_count}⇣${behind_count}"
+
+
+# ─── Docker ──────────────────────────────────────────────────────────────────
 
 [docker_context]
-symbol = " "
-style = "bold #74c7ec"
+symbol        = " "
+style         = "bold #74c7ec"
 only_with_files = true
+format        = "[$symbol$context]($style) "
+
+# ─── Duration ────────────────────────────────────────────────────────────────
 
 [cmd_duration]
 min_time = 2000
-style = "#f9e2af"
-format = "[$duration]($style) "
+style    = "#f9e2af"
+format   = "[$duration]($style) "
+
+# ─── Time ────────────────────────────────────────────────────────────────────
+
+[time]
+disabled    = false
+time_format = "%R"
+style       = "#6c7086"
+format      = "[$time]($style)"
+
+# ─── Prompt character ────────────────────────────────────────────────────────
+
+[line_break]
+disabled = false
 
 [character]
-success_symbol = "[❯](#a6e3a1)"
-error_symbol = "[❯](#f38ba8)"
+disabled                  = false
+success_symbol            = "[❯](bold #a6e3a1)"
+error_symbol              = "[❯](bold #f38ba8)"
+vimcmd_symbol             = "[❮](bold #cba6f7)"
+vimcmd_replace_one_symbol = "[❮](bold #cba6f7)"
+vimcmd_replace_symbol     = "[❮](bold #cba6f7)"
+vimcmd_visual_symbol      = "[❮](bold #f9e2af)"
