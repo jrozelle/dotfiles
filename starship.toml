@@ -45,15 +45,15 @@ truncate_to_repo = true
 
 [directory.substitutions]
 "Documents" = "󰈙 "
-"Downloads"  = " "
+"Downloads"  = "󰉖 "
 "Music"      = "󰝚 "
-"Pictures"   = " "
+"Pictures"   = "󰏥 "
 "Developer"  = "󰲋 "
 
 # ─── Git ─────────────────────────────────────────────────────────────────────
 
 [git_branch]
-symbol = ""
+symbol = ""
 style = "bg:#394260"
 format = '[[ $symbol $branch ](fg:#769ff0 bg:#394260)]($style)'
 
@@ -64,60 +64,60 @@ format = '[[($all_status$ahead_behind )](fg:#769ff0 bg:#394260)]($style)'
 # ─── Languages ───────────────────────────────────────────────────────────────
 
 [nodejs]
-symbol = ""
+symbol = ""
 style = "bg:#212736"
 format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
 [c]
-symbol = " "
+symbol = " "
 style = "bg:#212736"
 format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
 [rust]
-symbol = ""
+symbol = ""
 style = "bg:#212736"
 format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
 [golang]
-symbol = ""
+symbol = ""
 style = "bg:#212736"
 format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
 [php]
-symbol = ""
+symbol = ""
 style = "bg:#212736"
 format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
 [java]
-symbol = " "
+symbol = " "
 style = "bg:#212736"
 format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
 [kotlin]
-symbol = ""
+symbol = ""
 style = "bg:#212736"
 format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
 [haskell]
-symbol = ""
+symbol = ""
 style = "bg:#212736"
 format = '[[ $symbol ($version) ](fg:#769ff0 bg:#212736)]($style)'
 
 [python]
-symbol = ""
+symbol = ""
 style = "bg:#212736"
 format = '[[ $symbol ($version)(\(#$virtualenv\)) ](fg:#769ff0 bg:#212736)]($style)'
 
 # ─── Docker ──────────────────────────────────────────────────────────────────
 
 [docker_context]
-symbol = ""
+symbol = ""
 style = "bg:#1d2230"
 only_with_files = true
 format = '[[ $symbol $context ](fg:#a0a9cb bg:#1d2230)]($style)'
 
 [conda]
-symbol = "  "
+symbol = "  "
 style = "fg:#a0a9cb bg:#1d2230"
 format = '[$symbol$environment ]($style)'
 ignore_base = false
