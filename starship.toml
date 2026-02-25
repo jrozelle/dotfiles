@@ -83,22 +83,22 @@ read_only_style    = "bold #f38ba8"
 
 [git_branch]
 symbol = " "
-style  = "bold #a6e3a1"
+style  = "bold #cba6f7"
 format = "on [$symbol$branch(:$remote_branch)]($style) "
 
 [git_status]
-style      = "bold #f38ba8"
+style      = "#f38ba8"
 format     = '([$all_status$ahead_behind]($style) )'
-conflicted = "⚡"
+conflicted = "="
 untracked  = "?"
-stashed    = "󰏗"
+stashed    = "\\$"
 modified   = "!"
-staged     = "+"
+staged     = "[+](#a6e3a1)"
 renamed    = "»"
 deleted    = "✘"
-ahead      = "↑${count}"
-behind     = "↓${count}"
-diverged   = "↕${ahead_count}↓${behind_count}"
+ahead      = "⇡${count}"
+behind     = "⇣${count}"
+diverged   = "⇕⇡${ahead_count}⇣${behind_count}"
 
 # ─── Languages ───────────────────────────────────────────────────────────────
 
@@ -159,8 +159,8 @@ format        = "[$symbol$context]($style) "
 
 [cmd_duration]
 min_time = 2000
-style    = "#a6adc8"
-format   = "took [$duration]($style) "
+style    = "#f9e2af"
+format   = "[$duration]($style) "
 
 # ─── Time ────────────────────────────────────────────────────────────────────
 
