@@ -829,6 +829,17 @@ for dir in "${HOME_DIRS[@]}"; do
   [[ -d "$DOTFILES/$dir" ]] && link_file "$DOTFILES/$dir" "$HOME/$dir"
 done
 
+# Create ~/.gitconfig.local if absent (personal git identity, not versioned)
+if [[ ! -f "$HOME/.gitconfig.local" ]]; then
+  echo "==> Creating ~/.gitconfig.local (fill in your name and email)"
+  cat > "$HOME/.gitconfig.local" <<'EOF'
+[user]
+  name = Your Name
+  email = you@example.com
+EOF
+  echo "    Edit ~/.gitconfig.local to set your git identity"
+fi
+
 # Config directory files
 mkdir -p "$HOME/.config"
 for file in "${CONFIG_FILES[@]}"; do
