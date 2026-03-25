@@ -1,6 +1,5 @@
-[user]
-	name = jrozelle
-	email = julien@rozelle.fr
+[include]
+	path = ~/.gitconfig.local
 
 [core]
 	editor = vim
