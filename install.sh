@@ -78,6 +78,13 @@ if $IS_SYNOLOGY; then
     sudo umount /opt 2>/dev/null || true
   fi
 
+  # If /opt/bin is itself a symlink (proxy created by a previous install), resolve
+  # the real Entware root so the symlink-creation block below can fill in any gaps.
+  if [[ "$ENTWARE_ROOT" == "/opt" ]] && [[ -L "/opt/bin" ]]; then
+    _real=$(readlink -f /opt/bin 2>/dev/null)
+    [[ -n "$_real" ]] && ENTWARE_ROOT="${_real%/bin}"
+  fi
+
   echo "Entware found at $ENTWARE_ROOT"
 
   # If Entware lives outside /opt, create symlinks so hardcoded /opt paths
@@ -85,18 +92,11 @@ if $IS_SYNOLOGY; then
   # Symlinks coexist with Docker's /opt/containerd — unlike a bind mount
   # which would hide it.
   if [[ "$ENTWARE_ROOT" != "/opt" ]]; then
-    for d in bin etc lib libexec sbin share; do
+    for d in bin etc lib libexec sbin share tmp var; do
       if [[ -d "$ENTWARE_ROOT/$d" ]] && [[ ! -e "/opt/$d" ]]; then
         sudo ln -s "$ENTWARE_ROOT/$d" "/opt/$d" 2>/dev/null || true
       fi
     done
-    # Si /opt/etc est un vrai répertoire (pas un symlink), on ne peut pas lier tout
-    # le dossier. Créer au minimum le symlink sur opkg.conf pour que opkg fonctionne.
-    if [[ -d "$ENTWARE_ROOT/etc" ]] && [[ -d "/opt/etc" ]] && [[ ! -L "/opt/etc" ]]; then
-      if [[ ! -e "/opt/etc/opkg.conf" ]]; then
-        sudo ln -s "$ENTWARE_ROOT/etc/opkg.conf" "/opt/etc/opkg.conf"
-      fi
-    fi
   fi
 
   # Add Entware to PATH for this session
