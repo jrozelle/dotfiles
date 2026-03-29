@@ -93,7 +93,7 @@ if $IS_SYNOLOGY; then
   # which would hide it.
   if [[ "$ENTWARE_ROOT" != "/opt" ]]; then
     for d in bin etc lib libexec sbin share tmp var; do
-      if [[ -d "$ENTWARE_ROOT/$d" ]] && [[ ! -e "/opt/$d" ]]; then
+      if sudo test -d "$ENTWARE_ROOT/$d" 2>/dev/null && [[ ! -e "/opt/$d" ]]; then
         sudo ln -s "$ENTWARE_ROOT/$d" "/opt/$d" 2>/dev/null || true
       fi
     done
