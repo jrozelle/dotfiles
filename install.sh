@@ -99,6 +99,12 @@ if $IS_SYNOLOGY; then
     done
   fi
 
+  # /opt and the Entware volume dir are drwx------ — make them traversable
+  # so non-root users can execute Entware binaries via the /opt symlinks.
+  sudo chmod 711 /opt 2>/dev/null || true
+  _entware_vol=$(dirname "$ENTWARE_ROOT")
+  sudo chmod 711 "$_entware_vol" 2>/dev/null || true
+
   # Add Entware to PATH for this session
   export PATH="$ENTWARE_ROOT/bin:$ENTWARE_ROOT/sbin:$PATH"
 
