@@ -49,7 +49,7 @@ if $IS_SYNOLOGY; then
   # Find existing Entware (check common Synology locations)
   ENTWARE_ROOT=""
   for d in /opt /volume1/@entware-ng/opt /volume1/@Entware/opt; do
-    if [[ -x "$d/bin/opkg" ]]; then
+    if sudo test -x "$d/bin/opkg" 2>/dev/null; then
       ENTWARE_ROOT="$d"
       break
     fi
@@ -90,6 +90,13 @@ if $IS_SYNOLOGY; then
         sudo ln -s "$ENTWARE_ROOT/$d" "/opt/$d" 2>/dev/null || true
       fi
     done
+    # Si /opt/etc est un vrai répertoire (pas un symlink), on ne peut pas lier tout
+    # le dossier. Créer au minimum le symlink sur opkg.conf pour que opkg fonctionne.
+    if [[ -d "$ENTWARE_ROOT/etc" ]] && [[ -d "/opt/etc" ]] && [[ ! -L "/opt/etc" ]]; then
+      if [[ ! -e "/opt/etc/opkg.conf" ]]; then
+        sudo ln -s "$ENTWARE_ROOT/etc/opkg.conf" "/opt/etc/opkg.conf"
+      fi
+    fi
   fi
 
   # Add Entware to PATH for this session
