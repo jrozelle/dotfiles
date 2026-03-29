@@ -80,8 +80,8 @@ if $IS_SYNOLOGY; then
 
   # If /opt/bin is itself a symlink (proxy created by a previous install), resolve
   # the real Entware root so the symlink-creation block below can fill in any gaps.
-  if [[ "$ENTWARE_ROOT" == "/opt" ]] && [[ -L "/opt/bin" ]]; then
-    _real=$(readlink -f /opt/bin 2>/dev/null)
+  if [[ "$ENTWARE_ROOT" == "/opt" ]] && sudo test -L "/opt/bin" 2>/dev/null; then
+    _real=$(sudo readlink -f /opt/bin 2>/dev/null)
     [[ -n "$_real" ]] && ENTWARE_ROOT="${_real%/bin}"
   fi
 
