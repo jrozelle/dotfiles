@@ -114,3 +114,4 @@ unset _f _os
 # Overrides locaux (non versionnés — tokens, chemins machine-spécifiques)
 # --------------------
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+export PATH="$HOME/.local/bin:$PATH"
