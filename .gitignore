@@ -1,2 +1,5 @@
 # Neovim
 nvim/lazy-lock.json
+
+# Claude Code — réglages locaux (par machine)
+.claude/settings.local.json
