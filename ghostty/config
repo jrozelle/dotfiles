@@ -1,0 +1,116 @@
+# =====================================================================
+# Ghostty — config alignée sur le profil iTerm2 "Default" (A/B honnête)
+# Fichier réellement chargé (un seul) :
+#   ~/Library/Application Support/com.mitchellh.ghostty/config.ghostty
+#   -> symlink vers ~/Documents/git/dotfiles/ghostty/config (ce fichier)
+#   C'est celui que Cmd+, ouvre.
+# Vérifié à la main : ce chemin est lu APRÈS ~/.config/ghostty/config et
+# l'écrase ; on ne met donc AUCUN "config" côté ~/.config pour éviter le
+# double chargement (font-family s'empilerait deux fois).
+# En revanche les thèmes perso sont cherchés UNIQUEMENT dans
+#   ~/.config/ghostty/themes/  -> symlink vers dotfiles/ghostty/themes
+# Cmd+Shift+,  recharger à chaud   |   ghostty +validate-config
+# Découverte : Cmd+Shift+P (palette de commandes)
+# =====================================================================
+
+# --------------------
+# Police  (iTerm : JetBrainsMonoNF-Regular 13)
+# --------------------
+font-family = JetBrainsMono Nerd Font Mono
+font-size = 13
+font-thicken = false
+# Si les lignes te semblent plus serrées/aérées qu'iTerm, ajuste :
+# adjust-cell-height = 5%
+
+# --------------------
+# Couleurs — blanc sur noir, palette Tango de mon profil iTerm2 "Default"
+# (fichier themes/iterm-default, extrait du plist iTerm le 2026-08-18)
+# Alternative testée : theme = Catppuccin Mocha  (livré avec Ghostty, aligné
+# sur bat/fzf/micro/delta — mais fond #1e1e2e, moins contrasté)
+# Liste des thèmes livrés : ghostty +list-themes
+# --------------------
+theme = iterm-default
+
+# Gras en couleur "bright" comme iTerm ("Use Bright Bold" = ON).
+bold-color = bright
+
+# --------------------
+# Lisibilité — ratio de contraste minimal (WCAG, 1 = désactivé, 21 = max)
+# Corrige le texte gris-sur-gris (bandeau du prompt épinglé de Claude Code,
+# hints "dim" divers). 3 = seuil "lisible" selon la doc ; descendre à 1.5-2
+# si le rendu paraît trop aplati (les couleurs sont poussées vers blanc/noir).
+# iTerm avait l'équivalent "Minimum Contrast", réglé à 0 chez toi.
+# --------------------
+minimum-contrast = 3
+
+# --------------------
+# Curseur  (iTerm : barre verticale, clignotante)
+# --------------------
+cursor-style = bar
+cursor-style-blink = true
+
+# --------------------
+# Clavier macOS — layout FR
+# Option GAUCHE = Alt/Esc+ (comme iTerm "Option Key Sends: Esc+"),
+# Option DROITE laissée intacte pour taper { [ ] } | @ # sur AZERTY Mac.
+# --------------------
+macos-option-as-alt = left
+
+# Shift+flèches : Ghostty les capte par défaut (ajustement de sélection),
+# ce qui casserait les widgets de sélection zsh (.zshrc.d/20-bindings.zsh).
+keybind = shift+arrow_left=unbind
+keybind = shift+arrow_right=unbind
+keybind = shift+arrow_up=unbind
+keybind = shift+arrow_down=unbind
+
+# Opt+Shift+Backspace -> ESC BS  = backward-kill-space-word (zsh)
+keybind = alt+shift+backspace=text:\x1b\x08
+# Opt+Suppr -> kill-word vers l'avant
+keybind = alt+delete=esc:d
+
+# Déjà natifs dans Ghostty, rien à mapper :
+#   Cmd+←/→ = ^A/^E   Cmd+Backspace = ^U   Opt+←/→ = ESC b / ESC f
+#   Cmd+↑/↓ = saut de prompt en prompt (via shell integration)
+#   Cmd+K = clear   Cmd+D / Cmd+Shift+D = splits   Cmd+Alt+flèches = navigation splits
+
+# --------------------
+# Fenêtre / terminal
+# --------------------
+# ~100 Mo de scrollback (iTerm était plafonné à 10 000 lignes)
+scrollback-limit = 100000000
+# iTerm : "Prompt before closing" = off
+confirm-close-surface = false
+# Onglets intégrés à la barre de titre (gain d'une ligne de hauteur)
+macos-titlebar-style = tabs
+# Restaure fenêtres/onglets au relancement
+window-save-state = always
+# Splits inactifs : 0.7 par défaut = trop sombre sur fond noir
+unfocused-split-opacity = 0.9
+window-padding-x = 4
+window-padding-y = 2
+mouse-hide-while-typing = true
+window-theme = auto
+
+# --------------------
+# SSH — dépôt public, pas de noms d'hôtes ici (ils vivent dans ~/.ssh/config,
+# non versionné). TERM=xterm-ghostty n'existe pas sur la plupart des hôtes :
+#   ssh-env      -> retombe sur xterm-256color pour ces hôtes
+#   ssh-terminfo -> tente d'installer le terminfo ghostty via tic (cache :
+#                   ghostty +ssh-cache)
+# --------------------
+shell-integration-features = cursor,title,path,ssh-env,ssh-terminfo
+
+# --------------------
+# Quick terminal = équivalent "hotkey window" d'iTerm
+# 1er usage : macOS demandera l'autorisation Accessibilité (raccourci global).
+# Si ça gêne, commente la ligne keybind.
+# --------------------
+keybind = global:ctrl+alt+space=toggle_quick_terminal
+quick-terminal-position = top
+quick-terminal-autohide = true
+
+# --------------------
+# Mises à jour
+# --------------------
+auto-update = check
+auto-update-channel = stable

@@ -867,6 +867,24 @@ for dir in "${CONFIG_DIRS[@]}"; do
   [[ -d "$DOTFILES/$dir" ]] && link_file "$DOTFILES/$dir" "$HOME/.config/$dir"
 done
 
+# ghostty (macOS uniquement pour l'instant)
+# Ghostty lit ~/Library/Application Support/com.mitchellh.ghostty/config[.ghostty]
+# APRÈS ~/.config/ghostty/config, et ce dernier l'écrase. On ne garde donc qu'un
+# seul fichier de conf (côté Application Support, c'est celui que Cmd+, ouvre),
+# mais les thèmes perso ne sont cherchés QUE dans ~/.config/ghostty/themes/.
+if [[ -d "$DOTFILES/ghostty" ]]; then
+  if $IS_MAC; then
+    GHOSTTY_SUPPORT="$HOME/Library/Application Support/com.mitchellh.ghostty"
+    mkdir -p "$GHOSTTY_SUPPORT"
+    link_file "$DOTFILES/ghostty/config" "$GHOSTTY_SUPPORT/config.ghostty"
+    # dossier réel, sans fichier "config" dedans, juste pour les thèmes
+    mkdir -p "$HOME/.config/ghostty"
+    [[ -d "$DOTFILES/ghostty/themes" ]] && link_file "$DOTFILES/ghostty/themes" "$HOME/.config/ghostty/themes"
+  else
+    link_file "$DOTFILES/ghostty" "$HOME/.config/ghostty"
+  fi
+fi
+
 # micro: only symlink settings.json and colorschemes (micro needs to write runtime files)
 # Skip if ~/.config/micro already points to dotfiles/micro (whole dir symlinked)
 if [[ -d "$DOTFILES/micro" ]]; then
