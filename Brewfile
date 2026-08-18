@@ -48,3 +48,8 @@ brew "glow"      # markdown dans le terminal
 cask "iterm2"
 cask "rectangle"
 cask "alfred"
+
+# Quick Look plugins
+cask "syntax-highlight"  # code source
+cask "qlmarkdown"        # markdown
+cask "betterzip"         # archives
